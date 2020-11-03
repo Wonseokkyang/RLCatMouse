@@ -13,21 +13,37 @@
 #  
 #   Ideas: option to parse from txt or manually set?
 #   Questions: should the cheese spawn in different spots?
-#   how about the cat and mouse?
+#   -how about the cat and mouse?
 #   changing spawn spots would make the agents 'smarter' but
 #   requires way more memory space for each agent.
-#   should the cat know where the cheese is? if it does, it could come up
+#   -should the cat know where the cheese is? if it does, it could come up
 #   with blocking/camping strategies :o
-#    
+#   -who goes first? do they go at the same time? what if they tie (cat and mouse are both on cheese cell)?
+#   #lets have the mouse go first. in case of tie, cat wins and mouse gets both reward and penalty. this means I cant
+#   calculate the mouse's q-value until after they both go.
 #
+#   Edit: 11/3- blank maze for now but left in code for walls
 #####################################################
 ##                  Resources                      ##
 #####################################################
 #
+#####################################################
+##                  Notes                          ##
+#####################################################
+#   I want to use the move function for both cat and mouse but
+#   they have different reward conditions. maybe I can
+#   move cat and mouse first then calculate reward?
+#   ex: move cat. move mouse. check if mouse is on cheese.
+#   check if cat is on mouse. 
+#   how do I feed this back into the brain though? 
+#   DECISION: cat and mouse move "at the same time"
+#
+#   action choice is outside the maze so choose mouse/cat move in main,
+#   
 ######################################################
 """
 from graphics import *  
-from consts import SPEED, DRAW_MAZE, UNIT, OUT_OF_FRAME, WALL, MOVE, TARGET
+from consts import SPEED, DRAW_MAZE, UNIT, OUT_OF_FRAME, WALL, MOVE, TARGET, ANNOUNCE_AGENT_MOVES
 import random
 
 
@@ -135,26 +151,50 @@ class Maze:
     ## end drawMaze
 
     #Takes agent obj and direction int for action direction to move the agent obj to calculate the reward and agentpos
+    #reward is saved into agent.reward as in agent.pos
     def moveAgent(self, agent, direction_num):
         if direction_num == 0: dy, dx = 1, 0        #UP
         elif direction_num == 1: dy, dx = -1, 0     #DOWN
         elif direction_num == 2: dy, dx = 0, -1     #LEFT
         elif direction_num == 3: dy, dx = 0, 1      #RIGHT
 
-        #lets test the move(x,y) function
+        """
+        I would like to use a wrapper that takes care of graphically moving the agent AND updating agent.pos
+        EDIT: would it be simpler to just keep it as is? inside the wrapper I have to check for DRAW_MAZE anyway
+        """
         x, y = agent.pos
-        agent.shapeObj.move(dx*UNIT, dy*UNIT)
-        x += dx
-        y += dy
-        agent.pos = (x,y)
-        time.sleep(SPEED)
+        agent.reward = 0    #reset reward value
 
-        # x, y = agent.pos
-
-        # agent.shapeObj
-    #  
-    #
-    #
+        #if agent attempts to move off screen, remove agent from screen and redraw
+        #went out of bounds- give penalty
+        if ((x+dx < 0) or (x+dx > self.rowsize-1)) or ((y+dy < 0) or (y+dy > self.colsize-1)):
+            if ANNOUNCE_AGENT_MOVES == True: print(agent.name,'went out of bounds')
+            if DRAW_MAZE == True:
+                agent.undraw(self.win)
+                time.sleep(SPEED)
+                agent.redraw(self.win)
+            agent.reward = OUT_OF_FRAME
+            # done = False  #this done check could be done in a endTurn() function in maze
+        #agent hit a wall, blink agent on wall before resetting
+        #wall hit so give penalty
+        elif self.mazeList[x+dx][y+dy] == '#':
+            if ANNOUNCE_AGENT_MOVES == True: print(agent.name, 'hit a wall')
+            if DRAW_MAZE == True:
+                agent.shapeObj.move(dx*UNIT,dy*UNIT)    #graphically move on screen but dont update agent's pos
+                agent.blink(self.win)
+                agent.redraw(self.win)
+            agent.reward = WALL
+            # done = False
+        #agent landed on regular tile
+        else:
+            if ANNOUNCE_AGENT_MOVES == True: print(agent.name, 'moved')
+            if DRAW_MAZE == True:
+                agent.shapeObj.move(dx*UNIT,dy*UNIT)
+                time.sleep(SPEED)
+            agent.pos = (x+dx, y+dy)
+            agent.reward = MOVE
+            # done = False
+        print(agent.name, ', reward', agent.pos, agent.reward ) # # CSV TEST
     ## end moveAgent
 
     ## Wrappers for moving agents- calls moveAgent
@@ -170,13 +210,12 @@ class Maze:
             self.shapeObj = shape
             self.shapeObj.setFill(color)
             self.pos = pos
-            self.name = name
-            print(self.name, 'initialized with shape:', self.shapeObj, '\tpos:', self.pos)
+            self.name = name    #cat/mouse/cheese- for testing and terminal printing
+            self.reward = 0
             #self.shape obj
         
         #for testing
         def printAgentInfo(self):
-            print(self.__class__.__name__)
             print(self.name, 'shapeObj=', self.shapeObj, 'pos=', self.pos)
 
         

@@ -1,5 +1,6 @@
 #Draw the graphical window to show the agent(s) in action. If false, simulate the runs until the end
 DRAW_MAZE = True    
+ANNOUNCE_AGENT_MOVES = True
 
 #Number of seconds to pause after drawing each step. Window refresh rate
 SPEED = 0.5
