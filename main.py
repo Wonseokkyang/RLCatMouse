@@ -33,33 +33,21 @@ def main():
     env.win.getMouse()
     
     #testing moveAgent
-    env.moveMouse(0)
+    env.moveMouse(1)
     env.mouse.printAgentInfo()
-    env.win.getMouse()
-
-    env.moveMouse(0)
-    env.mouse.printAgentInfo()
-    env.win.getMouse()
 
     env.moveCat(1)
-    env.cat.printAgentInfo()
-    env.win.getMouse()
 
-    env.moveCat(1)
-    env.cat.printAgentInfo()
-    env.win.getMouse()
+    print(env.turnEnd())
 
-    #restart
-    env.restart()
-    env.win.getMouse()
 
-    env.moveCat(1)
-    env.cat.printAgentInfo()
-    env.win.getMouse()
+    # env.moveCat(1)
+    # env.cat.printAgentInfo()
+    # env.win.getMouse()
 
-    env.moveCat(1)
-    env.cat.printAgentInfo()
-    env.win.getMouse()
+    # env.moveCat(1)
+    # env.cat.printAgentInfo()
+    # env.win.getMouse()
     #works
 
 
