@@ -30,29 +30,20 @@
 
 import time
 from env import Maze
+from brain import Brain
 from consts import FILE_NAME
+from consts import DRAW_MAZE
+from consts import ALPHA, GAMMA, EPSILON
 
 def main():
+    alpha = ALPHA
+    gamma = GAMMA
+    epsilon = EPSILON
+
     env = Maze(FILE_NAME)
-    env.win.getMouse()
+    myCat = Brain(env.actions, alpha, gamma, epsilon)
+
     
-    #testing moveAgent
-    env.moveMouse(1)
-    env.mouse.printAgentInfo()
-
-    env.moveCat(1)
-
-    print(env.turnEnd())
-
-
-    # env.moveCat(1)
-    # env.cat.printAgentInfo()
-    # env.win.getMouse()
-
-    # env.moveCat(1)
-    # env.cat.printAgentInfo()
-    # env.win.getMouse()
-    #works
 
 
 
