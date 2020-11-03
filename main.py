@@ -30,6 +30,41 @@ from consts import FILE_NAME
 
 def main():
     env = Maze(FILE_NAME)
+    env.win.getMouse()
     
+    #testing moveAgent
+    env.moveMouse(0)
+    env.mouse.printAgentInfo()
+    env.win.getMouse()
+
+    env.moveMouse(0)
+    env.mouse.printAgentInfo()
+    env.win.getMouse()
+
+    env.moveCat(1)
+    env.cat.printAgentInfo()
+    env.win.getMouse()
+
+    env.moveCat(1)
+    env.cat.printAgentInfo()
+    env.win.getMouse()
+
+    #restart
+    env.restart()
+    env.win.getMouse()
+
+    env.moveCat(1)
+    env.cat.printAgentInfo()
+    env.win.getMouse()
+
+    env.moveCat(1)
+    env.cat.printAgentInfo()
+    env.win.getMouse()
+    #works
+
+
+
+
+
 main()
 print('after main')

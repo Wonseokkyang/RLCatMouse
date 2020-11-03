@@ -11,7 +11,14 @@
 #   Responsible for initializing the maze/field environment
 #   for the cat and mouse to learn in.
 #  
-#   Ideas: option to parse from txt or manually set
+#   Ideas: option to parse from txt or manually set?
+#   Questions: should the cheese spawn in different spots?
+#   how about the cat and mouse?
+#   changing spawn spots would make the agents 'smarter' but
+#   requires way more memory space for each agent.
+#   should the cat know where the cheese is? if it does, it could come up
+#   with blocking/camping strategies :o
+#    
 #
 #####################################################
 ##                  Resources                      ##
@@ -20,7 +27,7 @@
 ######################################################
 """
 from graphics import *  
-from consts import SPEED, DRAW_MAZE
+from consts import SPEED, DRAW_MAZE, UNIT, OUT_OF_FRAME, WALL, MOVE, TARGET
 import random
 
 
@@ -31,12 +38,8 @@ import random
 #change mpos, cpos starting position after first round of testing
 
 """
-mpos = mouse position <tuple>
-cpos = cat position <tuple>
-chpos = cheese position <tuple>
+Maze class also holds a nested Agent class for the cat, mouse, and cheese
 """
-UNIT = 30
-
 class Maze:
     #Populate self with maze from FILENAME and sets default values for pos&actions
     def __init__(self, mazeTextFile):
@@ -57,58 +60,65 @@ class Maze:
         print("Number of rows: %d \tNumber of cols: %d" % 
                     (self.rowsize, self.colsize))
 
-        #initializes all agent pos
-        self.restart()
+        #initializes all agent objects
+        self.initAgents()
 
         #Graphics window init
         if DRAW_MAZE == True:
             self.win = GraphWin("Maze Visual "+mazeTextFile, 
                 width=UNIT*self.colsize, 
                 height=UNIT*self.rowsize)    #setup display window according to maze size
-            self.drawMaze()
-
-            self.mouse = Oval(Point(0,0), Point(0,0))
-            self.cat = Rectangle(Point(0,0), Point(0,0))
-            self.cheese = Oval(Point(0,0), Point(0,0))
+            self.drawMaze() #base layer of graphical window
             self.redrawAgents()  #draw all agents on screen according to positions
-            self.win.getMouse()
-            self.win.close()
     ## end __init__
 
-    #undraw and redraw all 3 agents according to self positions
+    #starting pos of agents- also in restart()
+    def initAgents(self):
+        mousepos = (0,0)
+        catpos = (self.rowsize-1, self.colsize-1)
+        cheesepos = (random.randint(0,self.rowsize-1), random.randint(0,self.colsize-1))  #random position on board
+        while (cheesepos == mousepos or cheesepos == catpos):
+            cheesepos = (random.randint(0,self.rowsize-1), random.randint(0,self.colsize-1))
+
+        mx, my = mousepos
+        cx, cy = catpos
+        chx, chy = cheesepos
+
+        self.mouse = self.Agent( Oval(Point(mx*UNIT, my*UNIT), Point(mx*UNIT+UNIT, my*UNIT+UNIT)), "pink", mousepos, "Mouse")
+        self.cat = self.Agent( Rectangle(Point(cx*UNIT,cy*UNIT), Point(cx*UNIT+UNIT,cy*UNIT+UNIT)), "red", catpos, "Cat")
+        self.cheese = self.Agent( Oval( Point(chx*UNIT+UNIT/4, chy*UNIT+UNIT/4), Point(chx*UNIT+UNIT-UNIT/4, chy*UNIT+UNIT-UNIT/4)), "yellow", cheesepos, "Cheese")
+    ## end initAgents
+
+    #undraw and redraw all 3 agents according to Agent positions
     def redrawAgents(self):
-        self.mouse.undraw()
-        self.cat.undraw()
-        self.cheese.undraw()
+        mx, my = self.mouse.pos
+        cx, cy = self.cat.pos
+        chx, chy = self.cheese.pos
 
-        mx, my = self.mpos
-        cx, cy = self.cpos
-        chx, chy = self.chpos
+        self.mouse = self.Agent( Oval(Point(mx*UNIT, my*UNIT), Point(mx*UNIT+UNIT, my*UNIT+UNIT)), "pink", self.mouse.pos, "Mouse")
+        self.cat = self.Agent( Rectangle(Point(cx*UNIT,cy*UNIT), Point(cx*UNIT+UNIT,cy*UNIT+UNIT)), "red", self.cat.pos, "Cat")
+        self.cheese = self.Agent( Oval( Point(chx*UNIT+UNIT/4, chy*UNIT+UNIT/4), Point(chx*UNIT+UNIT-UNIT/4, chy*UNIT+UNIT-UNIT/4)), "yellow", self.cheese.pos, "Cheese")
 
-        self.mouse = Oval( Point(mx*UNIT, my*UNIT), Point(mx*UNIT+UNIT, my*UNIT+UNIT))
-        self.cat = Rectangle(Point(cx*UNIT,cy*UNIT), Point(cx*UNIT+UNIT,cy*UNIT+UNIT))
-        self.cheese = Oval( Point(chx*UNIT+UNIT/4, chy*UNIT+UNIT/4), Point(chx*UNIT+UNIT-UNIT/4, chy*UNIT+UNIT-UNIT/4))
-
-        self.mouse.setFill("pink")
-        self.cat.setFill("red")
-        self.cheese.setFill("yellow")
-
-        self.mouse.draw(self.win)
-        self.cat.draw(self.win)
-        self.cheese.draw(self.win)
-        time.sleep(SPEED)
+        self.mouse.redraw(self.win)
+        self.cat.redraw(self.win)
+        self.cheese.redraw(self.win)
     ## end redrawAgents
 
-
     #restarts the maze like it was initialized, resetting agent's tracked xpos, ypos
+    #also randomizes cheese placement on each restart (?)
     def restart(self):
+        print('RESTART CALLED')
+        self.mouse.undraw(self.win)
+        self.cat.undraw(self.win)
+        self.cheese.undraw(self.win)
         #Agent(s) objct positions init, starting positions
         #Mouse POSition, Cat POSition, CHeese POSition
-        self.mpos = (0, 0)   #always start at 0,0
-        self.cpos = (self.rowsize-1, self.colsize-1)
-        self.chpos = (random.randint(0,self.rowsize-1), random.randint(0,self.colsize-1))  #random position on board
-        while (self.chpos == self.mpos or self.chpos == self.cpos):
-            self.chpos = (random.randint(0,self.rowsize-1), random.randint(0,self.colsize-1))  
+        self.mouse.pos = (0, 0)   #always start at 0,0
+        self.cat.pos = (self.rowsize-1, self.colsize-1)
+        self.cheese.pos = (random.randint(0,self.rowsize-1), random.randint(0,self.colsize-1))  #random position on board
+        while (self.cheese.pos == self.mouse.pos or self.cheese.pos == self.cat.pos):
+            self.cheese.pos = (random.randint(0,self.rowsize-1), random.randint(0,self.colsize-1))
+        if DRAW_MAZE == True: self.redrawAgents()
     ## end restart
 
     #Graphic visualization of maze
@@ -124,6 +134,68 @@ class Maze:
                     dSquare.draw(self.win)
     ## end drawMaze
 
+    #Takes agent obj and direction int for action direction to move the agent obj to calculate the reward and agentpos
+    def moveAgent(self, agent, direction_num):
+        if direction_num == 0: dy, dx = 1, 0        #UP
+        elif direction_num == 1: dy, dx = -1, 0     #DOWN
+        elif direction_num == 2: dy, dx = 0, -1     #LEFT
+        elif direction_num == 3: dy, dx = 0, 1      #RIGHT
+
+        #lets test the move(x,y) function
+        x, y = agent.pos
+        agent.shapeObj.move(dx*UNIT, dy*UNIT)
+        x += dx
+        y += dy
+        agent.pos = (x,y)
+        time.sleep(SPEED)
+
+        # x, y = agent.pos
+
+        # agent.shapeObj
+    #  
+    #
+    #
+    ## end moveAgent
+
+    ## Wrappers for moving agents- calls moveAgent
+    def moveMouse(self, direction_num):
+        self.moveAgent(self.mouse, direction_num)
+    ## end moveMouse
+    def moveCat(self, direction_num):
+        self.moveAgent(self.cat, direction_num)
+    ## end moveCat
+
+    class Agent:
+        def __init__(self, shape, color="green", pos=(0,0), name="BLANK"):
+            self.shapeObj = shape
+            self.shapeObj.setFill(color)
+            self.pos = pos
+            self.name = name
+            print(self.name, 'initialized with shape:', self.shapeObj, '\tpos:', self.pos)
+            #self.shape obj
+        
+        #for testing
+        def printAgentInfo(self):
+            print(self.__class__.__name__)
+            print(self.name, 'shapeObj=', self.shapeObj, 'pos=', self.pos)
+
+        
+        def blink(self, window):
+            for _ in range(2):
+                self.shapeObj.undraw()
+                time.sleep(SPEED/4)
+                self.shapeObj.draw(window)
+                time.sleep(SPEED/4)
+
+        def undraw(self, window):
+            self.shapeObj.undraw()
+
+        def redraw(self, window):
+            self.shapeObj.undraw()
+            self.shapeObj.draw(window)
+
+
+    
 """
     #Takes int argument for action/direction to move the agent to calculate the reward and new self.pos
     def moveAgent(self, direction_num):
