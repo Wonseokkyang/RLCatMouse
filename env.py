@@ -56,6 +56,18 @@ import random
 
 """
 Maze class also holds a nested Agent class for the cat, mouse, and cheese
+mazeList = <list>   2d array of the maze environment. #=wall
+actions = <int>     cardinal directions. 0=U 1=D 2=L 3=R
+win = <obj>         graphic window object to draw to
+class Agent         a object type to hold agent information in relation to board
+    mouse = <obj>   
+    cat = <obj>
+    cheese = <obj>
+        shapeObj = <shape obj>
+        pos = <tuple>
+        name = <string>    
+        reward = <int>
+
 """
 class Maze:
     #Populate self with maze from FILENAME
@@ -90,7 +102,7 @@ class Maze:
             self.redrawAgents()  # Draw all agents on screen
     ## end __init__
 
-    # Starting pos of agents- also in restart()
+    # Initialization of Agent class for mouse, cat and cheese- also in restart()
     def initAgents(self):
         mousepos = (0,0)
         catpos = (self.rowsize-1, self.colsize-1)
@@ -239,8 +251,7 @@ class Maze:
             done = True
         return self.cat.pos, self.cat.reward, self.mouse.pos, self.mouse.reward, done
 
-    
-
+    # Agent class initialized in initAgents() and re
     class Agent:
         def __init__(self, shape, color="green", 
                     pos=(0,0), name="BLANK"):
@@ -253,19 +264,29 @@ class Maze:
         
         # For testing
         def printAgentInfo(self):
-            print(self.name, 'shapeObj=', self.shapeObj, 'pos=', self.pos)
+            print('Name:', self.name)
+            print('shapeObj=', self.shapeObj)
+            print('pos=', self.pos)
+            print('Reward:', self.reward)
+        ##end printAgentInfo
 
+        # Blink the agent on screen inplace
         def blink(self, window):
             for _ in range(2):
                 self.shapeObj.undraw()
                 time.sleep(SPEED/4)
                 self.shapeObj.draw(window)
                 time.sleep(SPEED/4)
+        ## end blink
 
+        # Wrapper to move undraw() function from shape obj to agent
         def undraw(self, window):
             self.shapeObj.undraw()
+        ## end undraw
 
+        # Redraws the agent to last known position
         def redraw(self, window):
             self.shapeObj.undraw()
             self.shapeObj.draw(window)
+        ## end redraw
     ## end class Agent

@@ -47,4 +47,7 @@ CAUGHT = TARGET         #reward for mouse reaching cheese and/or cat reaching mo
 ALPHA = 0.9             #how heavily the learning algorithm gets changed toward a positive reward (learning rate)
 GAMMA = 0.9             #the discount factor of future rewards (0 nearsighted vs 1 farsighted)
 EPSILON = 0.9           #the weight of the algo's 'greediness', less greedy = explore, more greedy = exploit
-LOOK_AHEAD_DEPTH = 2    #0 for greedy algo only, else LOOK_AHEAD_DEPTH = 'n'
+
+# Agent Values
+VIEW_DISTANCE = 3
+# LOOK_AHEAD_DEPTH = 2    #0 for greedy algo only, else LOOK_AHEAD_DEPTH = 'n'

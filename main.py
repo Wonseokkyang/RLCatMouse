@@ -27,10 +27,9 @@
 #
 ########################################################################
 """
-
 import time
 from env import Maze
-from brain import Brain
+# from brain import Brain
 from consts import FILE_NAME
 from consts import DRAW_MAZE
 from consts import ALPHA, GAMMA, EPSILON
@@ -40,10 +39,13 @@ def main():
     gamma = GAMMA
     epsilon = EPSILON
 
+    number_of_turns = 0
     env = Maze(FILE_NAME)
-    myCat = Brain(env.actions, alpha, gamma, epsilon)
-
-    
+    # myCat = Brain(env.actions, alpha, gamma, epsilon)
+#lets impliment regular, 1step with both cat and mouse first then apply n-step.
+#1-step with cat
+    while True:
+        number_of_turns += 1
 
 
 

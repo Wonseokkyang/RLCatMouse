@@ -29,11 +29,7 @@
 #   Should the cat&mouse continue from where it left off or start over?
 #   If they start over, do they spawn in the same spot?
 #   Would n-step lookahead be applicable? N-step would be used for 
-#   minmaxing in this case. What moves can the mouse take to minimize
-#   risk and maximize reward. Logically the mouse must eliminate paths
-#   where he can get caught completely even if it means prolonging
-#   getting the reward b/c the mouse can't get a reward if it's
-#   dead.
+#   minamaxing in this case. 
 #   
 #   Ideas:
 #   I'd love to create a visual heat map of the q-values at different
@@ -42,6 +38,11 @@
 #   Applying a neural network would be awesome but that requires much
 #   more research
 #
+#   Applying and adjusting what the professor suggested, perhaps the
+#   agent can keep a 'snapshot' of however big area around itself.
+#   within this 'snapshot' I can use the direct line Christina mentioned
+#   during class to include the cat in the snapshot if it's within 
+#   direct line of sight of the mouse.
 #
 ########################################################################
 ##                          Resources                                 ##
@@ -56,15 +57,20 @@
 """
 import pandas as pd
 import numpy as np
+from consts import VIEW_DISTANCE, ALPHA, GAMMA, EPSILON
+
+#const view_distance 
 
 class Brain:
     #List of actions provided during first func call
-    def __init__(self, actions, given_alpha, gamma, epsilon):
+    def __init__(self, name, pos, actions, given_alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON):
         self.actions = actions
         self.alpha = given_alpha
         self.gamma = gamma
         self.epsilon = epsilon
-        self.q_table = pd.DataFrame(columns=self.actions, dtype=np.float64)
+        self.q_table = {}   #key : snapshot of n area around agent. value : cardinal directions
+        self.name = name
+        self.pos = pos
 
     def choose_action(self, state):
         """
@@ -81,6 +87,23 @@ class Brain:
         else:   #otherwise, choose random
             action = np.random.choice(self.actions)
         return int(action)
+
+    # Given envState and agent objects, choose a random direction number to return
+    def chooseRandom(self, envState, cat, mouse, cheese):
+        hashedEnv = self.hashProcess(envState)
+
+
+    ##end chooseRandom
+
+    def hashProcess(self, envState):
+        #given the current board, extract the board snapshot around the agent of VIEW_DISTANCE
+        
+        #check to see if there's a wall obscuring the mouse/cat 's vision from seeing the cheese/mouse/cat
+            #true- keep obscured agent out of snapshot
+            #false- include agent in snapshot
+        #return snapshot
+
+    ##end hasProcess
 
     #updating q_table values
     def calculate(self, state, action, reward, new_state, target):
@@ -109,16 +132,3 @@ class Brain:
                 )
             )
 
-    #recursive call to update q_value of all directions from state
-    def n_step(self, env, state, depth):
-        state = env.pos
-        if depth > 0:
-            self.state_exist_check(state)
-            for action in self.actions: #for every direction move and calculate
-                # print('check action:', action, ' state:', state)
-                env.pos = state #reset for each direction
-                new_state, reward, done = env.moveAgent(action)
-                self.calculate(state, action, reward, new_state, env.tpos)
-                self.n_step(env, new_state, depth-1)
-                # print('after check action:', action, ' state:', state)
-        env.pos = state
