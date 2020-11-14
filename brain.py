@@ -55,6 +55,7 @@
 #
 ########################################################################
 """
+import random
 import pandas as pd
 import numpy as np
 from consts import VIEW_DISTANCE, ALPHA, GAMMA, EPSILON
@@ -71,64 +72,68 @@ class Brain:
         self.q_table = {}   #key : snapshot of n area around agent. value : cardinal directions
         self.name = name
         self.pos = pos
-
-    def choose_action(self, state):
-        """
-        Given state, choose an action according to EPSILON/greediness
-        RETURN: action
-        <int> action direction- epsilon/100 chance of moving to 
-        highest qvalue, (100-epsilon)/100 chance of moving randomly
-        """
-        self.state_exist_check(state)   #append to q_table if it doesnt exist already
-        if np.random.uniform() < self.epsilon:  #greediness 'roll'- if less, then be greedy
-            action_choices = self.q_table.loc[str(state), :]     #a list of directional values from 'state' ex: [0, 0, 0.5, 0]   left has highest value
-            #from chooseable actions, pick out of the largest/max
-            action = np.random.choice(action_choices[action_choices == np.max(action_choices)].index)
-        else:   #otherwise, choose random
-            action = np.random.choice(self.actions)
-        return int(action)
+    ## end __init__
 
     # Given envState and agent objects, choose a random direction number to return
     def chooseRandom(self, envState, cat, mouse, cheese):
-        hashedEnv = self.hashProcess(envState)
+        # hashedEnv = self.hashProcess(envState)
+        action = random.randint(0, len(self.actions)-1)
+        print('action', action)
+        return action
 
 
     ##end chooseRandom
 
-    def hashProcess(self, envState):
+    # def hashProcess(self, envState):
         #given the current board, extract the board snapshot around the agent of VIEW_DISTANCE
         
         #check to see if there's a wall obscuring the mouse/cat 's vision from seeing the cheese/mouse/cat
             #true- keep obscured agent out of snapshot
             #false- include agent in snapshot
         #return snapshot
-
     ##end hasProcess
 
-    #updating q_table values
-    def calculate(self, state, action, reward, new_state, target):
-        """ Takes arguments and updates q-value table according to bellman equation that's influenced by alpha or learn rate
-            RETURNS: q_
-            <int> q_ is the predicted qvalue for the given state action pair
-        """ 
-        self.state_exist_check(new_state)   #append the new_state to q_table to add/manip calculations
-        q = self.q_table.loc[str(state), action]   #Q value
-        # print('After q assignment') # # CSV TEST
+        # def choose_action(self, state):
+    #     """
+    #     Given state, choose an action according to EPSILON/greediness
+    #     RETURN: action
+    #     <int> action direction- epsilon/100 chance of moving to 
+    #     highest qvalue, (100-epsilon)/100 chance of moving randomly
+    #     """
+    #     self.state_exist_check(state)   #append to q_table if it doesnt exist already
+    #     if np.random.uniform() < self.epsilon:  #greediness 'roll'- if less, then be greedy
+    #         action_choices = self.q_table.loc[str(state), :]     #a list of directional values from 'state' ex: [0, 0, 0.5, 0]   left has highest value
+    #         #from chooseable actions, pick out of the largest/max
+    #         action = np.random.choice(action_choices[action_choices == np.max(action_choices)].index)
+    #     else:   #otherwise, choose random
+    #         action = np.random.choice(self.actions)
+    #     return int(action)
 
-        if new_state != target:   #agent didnt find exit
-            q_ = reward + self.gamma * self.q_table.loc[str(new_state),:].max()    #max possible Q of new state
-        else:   # agent found exit so there is no future state, just give reward
-            q_ = reward
-        self.q_table.loc[str(state),action] += self.alpha*(q_ - q) #update q_table with difference between estimate and actual * learning rate
+#   def state_exist_check(self, state):
+#         if str(state) not in self.q_table.index:
+#             self.q_table = self.q_table.append(     #required to assign a copy of the append q_table to original to keep values for some reason
+#                 pd.Series(      #make an entrie to the q_table according to this format for easy manipulation later
+#                     [0] * len(self.actions),
+#                     index = self.q_table.columns,   #columns of series entry according to dataframe(q_table) columns
+#                     name = str(state),   #the name(left most column for indexing)
+#                 )
+#             )
+    # #updating q_table values
+    # def calculate(self, state, action, reward, new_state, target):
+    #     """ Takes arguments and updates q-value table according to bellman equation that's influenced by alpha or learn rate
+    #         RETURNS: q_
+    #         <int> q_ is the predicted qvalue for the given state action pair
+    #     """ 
+    #     self.state_exist_check(new_state)   #append the new_state to q_table to add/manip calculations
+    #     q = self.q_table.loc[str(state), action]   #Q value
+    #     # print('After q assignment') # # CSV TEST
+
+    #     if new_state != target:   #agent didnt find exit
+    #         q_ = reward + self.gamma * self.q_table.loc[str(new_state),:].max()    #max possible Q of new state
+    #     else:   # agent found exit so there is no future state, just give reward
+    #         q_ = reward
+    #     self.q_table.loc[str(state),action] += self.alpha*(q_ - q) #update q_table with difference between estimate and actual * learning rate
 
     #check if state exists in q_table, if not append it
-    def state_exist_check(self, state):
-        if str(state) not in self.q_table.index:
-            self.q_table = self.q_table.append(     #required to assign a copy of the append q_table to original to keep values for some reason
-                pd.Series(      #make an entrie to the q_table according to this format for easy manipulation later
-                    [0] * len(self.actions),
-                    index = self.q_table.columns,   #columns of series entry according to dataframe(q_table) columns
-                    name = str(state),   #the name(left most column for indexing)
-                )
-            )
+  
 

@@ -80,7 +80,6 @@ class Maze:
                 rowList.append(ch)
             self.mazeList.append(rowList)
         mazeText.close()
-
         # Cardinal directions:
         # 0 = UP,   1 = DOWN,   2 = LEFT,   3 = RIGHT
         self.actions = [0, 1, 2, 3] 
@@ -88,10 +87,8 @@ class Maze:
         self.rowsize = len(self.mazeList)
         print("Number of rows: %d \tNumber of cols: %d" % 
                     (self.rowsize, self.colsize))
-
         # Initializes all agent objects
         self.initAgents()
-
         # Graphics window init
         if DRAW_MAZE == True:
             # Setup display window according to maze size
@@ -115,7 +112,6 @@ class Maze:
         mx, my = mousepos
         cx, cy = catpos
         chx, chy = cheesepos
-
         # Init indi agents and starting loc's positionally and graphically
         self.mouse = self.Agent(
                 Oval(Point(mx*UNIT, my*UNIT), 
@@ -133,10 +129,12 @@ class Maze:
 
     # Undraw and redraw all 3 agents according to Agent positions
     def redrawAgents(self):
+        self.cat.undraw(self.win)
+        self.mouse.undraw(self.win)
+        self.cheese.undraw(self.win)
         mx, my = self.mouse.pos
         cx, cy = self.cat.pos
         chx, chy = self.cheese.pos
-
         self.mouse = self.Agent(
                 Oval(Point(mx*UNIT, my*UNIT), 
                 Point(mx*UNIT+UNIT, my*UNIT+UNIT)), 
@@ -153,6 +151,7 @@ class Maze:
         self.mouse.redraw(self.win)
         self.cat.redraw(self.win)
         self.cheese.redraw(self.win)
+        time.sleep(SPEED)
     ## end redrawAgents
 
     # Restarts agent's tracked pos to starting value.
@@ -189,41 +188,44 @@ class Maze:
                     dSquare.draw(self.win)
     ## end drawMaze
 
+    # Move the graphical rep of agent in direction_num, update pos,
+    # and calc update reward into Agent.reward
     def moveAgent(self, agent, direction_num):
         x, y = agent.pos
+        print('x,y', x,y)
         agent.reward = 0    # Reset reward value
         if direction_num == 0: dy, dx = 1, 0        # UP
         elif direction_num == 1: dy, dx = -1, 0     # DOWN
         elif direction_num == 2: dy, dx = 0, -1     # LEFT
         elif direction_num == 3: dy, dx = 0, 1      # RIGHT
-
         # If agent out of bounds- remove agent from screen and redraw
         if (x+dx < 0 or x+dx > self.rowsize-1) or (
             y+dy < 0 or y+dy > self.colsize-1):
             if ANNOUNCE_AGENT_MOVES == True: 
                 print(agent.name,'went out of bounds')
-            if DRAW_MAZE == True:
-                agent.undraw(self.win)
-                time.sleep(SPEED)
-                agent.redraw(self.win)
+            # if DRAW_MAZE == True:
+            #     agent.undraw(self.win)
+            #     time.sleep(SPEED/4)
+            #     agent.redraw(self.win)
+            #     time.sleep(SPEED)
             agent.reward = OUT_OF_FRAME
         # Agent hit a wall- blink agent on wall before resetting
         elif self.mazeList[x+dx][y+dy] == '#':
             if ANNOUNCE_AGENT_MOVES == True: 
                 print(agent.name, 'hit a wall')
-            if DRAW_MAZE == True:
-                # Graphically move on screen but dont update agent pos
-                agent.shapeObj.move(dx*UNIT,dy*UNIT)    
-                agent.blink(self.win)
-                agent.redraw(self.win)
+            # if DRAW_MAZE == True:
+            #     # Graphically move on screen but dont update agent pos
+            #     agent.shapeObj.move(dx*UNIT,dy*UNIT)    
+            #     agent.blink(self.win)
+            #     agent.redraw(self.win)
             agent.reward = WALL
         # Agent landed on regular tile
         else:
-            if ANNOUNCE_AGENT_MOVES == True: print(agent.name,'moved')
-            if DRAW_MAZE == True:
-                agent.shapeObj.move(dx*UNIT,dy*UNIT)
-                time.sleep(SPEED)
-            agent.pos = (x+dx, y+dy)
+            if ANNOUNCE_AGENT_MOVES == True: print(agent.name,'moved.')
+            # if DRAW_MAZE == True:
+            #     agent.shapeObj.move(dx*UNIT,dy*UNIT)
+            #     time.sleep(SPEED)
+            agent.pos = (x+dx, y+dy)    #pos only gets updated on valid move
             agent.reward = MOVE
         # print(agent.name, ', reward', agent.pos, agent.reward )
     ## end moveAgent
@@ -285,7 +287,7 @@ class Maze:
         def undraw(self, window):
             self.shapeObj.undraw()
         ## end undraw
-        # Redraws the agent to last known position
+        # Redraws the agent to last known x,y position in mem
         def redraw(self, window):
             self.shapeObj.undraw()
             self.shapeObj.draw(window)

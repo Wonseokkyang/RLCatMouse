@@ -29,24 +29,35 @@
 """
 import time
 from env import Maze
+from brain import Brain
 # from brain import Brain
-from consts import FILE_NAME
-from consts import DRAW_MAZE
-from consts import ALPHA, GAMMA, EPSILON
+from consts import FILE_NAME    #file to pull/gen env from
+from consts import DRAW_MAZE    #flag to draw graphically
+from consts import ALPHA as alpha, GAMMA as gamma, EPSILON as epsilon
 
 def main():
-    alpha = ALPHA
-    gamma = GAMMA
-    epsilon = EPSILON
-
     number_of_turns = 0
     env = Maze(FILE_NAME)
     # myCat = Brain(env.actions, alpha, gamma, epsilon)
+# def __init__(self, name, pos, actions, given_alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON):
+    myCat = Brain('Cat', env.cat.pos, env.actions)
+    myMouse = Brain('Mouse', env.mouse.pos, env.actions)
+    cheesePos = env.cheese.pos
+    board = env.mazeList
 #lets impliment regular, 1step with both cat and mouse first then apply n-step.
 #1-step with cat
     while True:
-        number_of_turns += 1
+        mouseAction = myMouse.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
+        env.moveMouse(mouseAction)
+        
+        catAction = myCat.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
+        env.moveCat(catAction)
 
+        env.redrawAgents()
+        
+        number_of_turns += 1
+        if number_of_turns == 100:
+            break
 
 
 
