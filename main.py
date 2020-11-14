@@ -53,8 +53,8 @@ def main():
         catAction = myCat.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
         env.moveCat(catAction)
 
-        env.redrawAgents()
-        
+        env.turnEnd()
+
         number_of_turns += 1
         if number_of_turns == 100:
             break

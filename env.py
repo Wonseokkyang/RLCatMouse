@@ -90,7 +90,7 @@ class Maze:
         # Initializes all agent objects
         self.initAgents()
         # Graphics window init
-        if DRAW_MAZE == True:
+        if DRAW_MAZE:
             # Setup display window according to maze size
             self.win = GraphWin("Maze Visual "+mazeTextFile, 
                 width=UNIT*self.colsize, 
@@ -172,7 +172,7 @@ class Maze:
                 or self.cheese.pos == self.cat.pos):
             self.cheese.pos = (random.randint(0,self.rowsize-1), 
                               random.randint(0,self.colsize-1))
-        if DRAW_MAZE == True: self.redrawAgents()
+        if DRAW_MAZE: self.redrawAgents()
     ## end restart
 
     # Graphic visualization of maze
@@ -201,9 +201,9 @@ class Maze:
         # If agent out of bounds- remove agent from screen and redraw
         if (x+dx < 0 or x+dx > self.rowsize-1) or (
             y+dy < 0 or y+dy > self.colsize-1):
-            if ANNOUNCE_AGENT_MOVES == True: 
+            if ANNOUNCE_AGENT_MOVES: 
                 print(agent.name,'went out of bounds')
-            # if DRAW_MAZE == True:
+            # if DRAW_MAZE:
             #     agent.undraw(self.win)
             #     time.sleep(SPEED/4)
             #     agent.redraw(self.win)
@@ -211,9 +211,9 @@ class Maze:
             agent.reward = OUT_OF_FRAME
         # Agent hit a wall- blink agent on wall before resetting
         elif self.mazeList[x+dx][y+dy] == '#':
-            if ANNOUNCE_AGENT_MOVES == True: 
+            if ANNOUNCE_AGENT_MOVES: 
                 print(agent.name, 'hit a wall')
-            # if DRAW_MAZE == True:
+            # if DRAW_MAZE:
             #     # Graphically move on screen but dont update agent pos
             #     agent.shapeObj.move(dx*UNIT,dy*UNIT)    
             #     agent.blink(self.win)
@@ -221,8 +221,8 @@ class Maze:
             agent.reward = WALL
         # Agent landed on regular tile
         else:
-            if ANNOUNCE_AGENT_MOVES == True: print(agent.name,'moved.')
-            # if DRAW_MAZE == True:
+            if ANNOUNCE_AGENT_MOVES: print(agent.name,'moved.')
+            # if DRAW_MAZE:
             #     agent.shapeObj.move(dx*UNIT,dy*UNIT)
             #     time.sleep(SPEED)
             agent.pos = (x+dx, y+dy)    #pos only gets updated on valid move
@@ -241,6 +241,7 @@ class Maze:
     # The cat catching the mouse and the mouse getting 
     # the cheese in the same turn is possible
     def turnEnd(self):
+        if DRAW_MAZE: self.redrawAgents()
         done = False
         # The cat ate the mouse
         if self.cat.pos == self.mouse.pos:
