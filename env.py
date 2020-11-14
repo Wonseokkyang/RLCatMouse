@@ -112,11 +112,11 @@ class Maze:
         while (cheesepos == mousepos or cheesepos == catpos):
             cheesepos = (random.randint(0,self.rowsize-1), 
                         random.randint(0,self.colsize-1))
-
         mx, my = mousepos
         cx, cy = catpos
         chx, chy = cheesepos
 
+        # Init indi agents and starting loc's positionally and graphically
         self.mouse = self.Agent(
                 Oval(Point(mx*UNIT, my*UNIT), 
                 Point(mx*UNIT+UNIT, my*UNIT+UNIT)), 
@@ -251,7 +251,7 @@ class Maze:
             done = True
         return self.cat.pos, self.cat.reward, self.mouse.pos, self.mouse.reward, done
 
-    # Agent class initialized in initAgents() and re
+    # Agent class initialized in initAgents() 
     class Agent:
         def __init__(self, shape, color="green", 
                     pos=(0,0), name="BLANK"):
@@ -261,7 +261,11 @@ class Maze:
             # For testing and terminal printing
             self.name = name    
             self.reward = 0
-        
+        ##end __init__
+        def reset(self, pos):
+            self.pos = pos
+            self.reward = 0
+        ## end reset 
         # For testing
         def printAgentInfo(self):
             print('Name:', self.name)
@@ -269,7 +273,6 @@ class Maze:
             print('pos=', self.pos)
             print('Reward:', self.reward)
         ##end printAgentInfo
-
         # Blink the agent on screen inplace
         def blink(self, window):
             for _ in range(2):
@@ -278,12 +281,10 @@ class Maze:
                 self.shapeObj.draw(window)
                 time.sleep(SPEED/4)
         ## end blink
-
         # Wrapper to move undraw() function from shape obj to agent
         def undraw(self, window):
             self.shapeObj.undraw()
         ## end undraw
-
         # Redraws the agent to last known position
         def redraw(self, window):
             self.shapeObj.undraw()
