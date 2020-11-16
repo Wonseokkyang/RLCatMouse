@@ -21,7 +21,7 @@
 
 # Name of txt file to create the learning environment
 # Located in ./mazetxt
-FILE_NAME = 'blank10x10'
+FILE_NAME = 'blank5x5wall'
 
 # Draw the graphical window to show the agent(s) in action.
 DRAW_MAZE = True
@@ -49,5 +49,5 @@ GAMMA = 0.9             #the discount factor of future rewards (0 nearsighted vs
 EPSILON = 0.9           #the weight of the algo's 'greediness', less greedy = explore, more greedy = exploit
 
 # Agent Values
-VIEW_DISTANCE = 3
+VIEW_DISTANCE = 1
 # LOOK_AHEAD_DEPTH = 2    #0 for greedy algo only, else LOOK_AHEAD_DEPTH = 'n'

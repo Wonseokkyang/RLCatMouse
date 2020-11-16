@@ -52,7 +52,17 @@
 ########################################################################
 ##                          Notes                                     ##
 ########################################################################
-#
+#   Problem I'm facing: 
+#   So I can implement a snapshot of the agent's surroundings to add
+#   to ass to the q-table but how about the walls and out of bounds?
+#   I was initially planning on having the agents run until an end
+#   condition is met but then how would I update the agent's penalty for
+#   running out of frame?
+#   I could possibly call the learning function early if the agent's
+#   reward isn't 0 in the main body of the program.
+# 
+#   Perhaps instead of vision distance we do depth distance, simulating
+#   the agent 
 ########################################################################
 """
 import random
@@ -64,34 +74,71 @@ from consts import VIEW_DISTANCE, ALPHA, GAMMA, EPSILON
 
 class Brain:
     #List of actions provided during first func call
-    def __init__(self, name, pos, actions, given_alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON):
+    def __init__(self, name, pos, actions, alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON):
         self.actions = actions
-        self.alpha = given_alpha
+        self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
         self.q_table = {}   #key : snapshot of n area around agent. value : cardinal directions
-        self.name = name
+        self.name = name    #mainly for troubleshooting
         self.pos = pos
+        self.history = []
     ## end __init__
 
     # Given envState and agent objects, choose a random direction number to return
-    def chooseRandom(self, envState, cat, mouse, cheese):
-        # hashedEnv = self.hashProcess(envState)
-        action = random.randint(0, len(self.actions)-1)
-        print('action', action)
+    # Return: random direction
+    def chooseRandom(self, envState, catPos, mousePos, cheesePos):
+        if self.name == 'Mouse': self.pos = mousePos
+        else: self.pos = catPos
+
+        self.history.append(self.hashProcess(
+                            envState, catPos, mousePos, cheesePos))
+        action = self.actions[random.randint(0, len(self.actions)-1)]
         return action
-
-
     ##end chooseRandom
 
-    # def hashProcess(self, envState):
-        #given the current board, extract the board snapshot around the agent of VIEW_DISTANCE
-        
-        #check to see if there's a wall obscuring the mouse/cat 's vision from seeing the cheese/mouse/cat
-            #true- keep obscured agent out of snapshot
-            #false- include agent in snapshot
-        #return snapshot
-    ##end hasProcess
+    # Given curr board, init q-table a board snapshot according to vDist
+    # and return the hashed 1d list of snapshot for tracking
+    def hashProcess(self, envState, catPos, mousePos, cheesePos):
+        # given the current board, extract the board snapshot around the agent of VIEW_DISTANCE
+        x,y = self.pos
+        snapshot = []
+        for rowNum, row in enumerate(envState):
+            if rowNum <= x + VIEW_DISTANCE and rowNum >= x - VIEW_DISTANCE:
+                tempRow = []
+                for colNum, square in enumerate(row):
+                    if colNum <= y + VIEW_DISTANCE and colNum >= y - VIEW_DISTANCE:
+                        tempRow.append(square)
+                snapshot.append(tempRow)
+
+        print('Snapshot:', snapshot)
+        #print snapshot
+        # for x, row in enumerate(snapshot):
+        #     for y, value in enumerate(row):
+        #         print('(', x, ',', y, ')', value)
+
+        # add in mouse, cheese, cat
+        # check to see if there's a wall obscuring the mouse/cat 's vision from seeing the cheese/mouse/cat
+            # true- keep obscured agent out of snapshot
+            # false- include agent in snapshot
+        return snapshot
+    ## end hasProcess
+
+    # Update self info with given info from board/main program
+    def updateBrain(self, catPos, catReward, mousePos, mouseReward):
+        if self.name == 'Mouse': 
+            self.pos = mousePos
+            # print('Updated mouse brain:', self.pos)
+        else: 
+            self.pos = catPos
+            # print('Updated cat brain:', self.pos)
+    ## end updateBrain
+
+    def printInfo(self):
+        print(' name:', self.name)
+        print(' position:', self.pos)
+        print(' history:', self.history)
+    ## end printInfo
 
         # def choose_action(self, state):
     #     """

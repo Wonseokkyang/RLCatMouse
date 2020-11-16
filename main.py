@@ -47,14 +47,27 @@ def main():
 #lets impliment regular, 1step with both cat and mouse first then apply n-step.
 #1-step with cat
     while True:
+        print('==At start of loop, cat and mouse information:==')
+        myCat.printInfo()
+        myMouse.printInfo()
+
+        print('Calling mouse.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         mouseAction = myMouse.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
         env.moveMouse(mouseAction)
+
+        # print('Calling cat.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
+        # catAction = myCat.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
+        # env.moveCat(catAction)
+
+        catPos, catReward, mousePos, mouseReward, done = env.turnEnd()
+
+        # Update agent's brains to reflect current board positions
+        # myCat.updateBrain(catPos, catReward, mousePos, mouseReward)
+        myMouse.updateBrain(catPos, catReward, mousePos, mouseReward)
+
+
+        env.win.getMouse()
         
-        catAction = myCat.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
-        env.moveCat(catAction)
-
-        env.turnEnd()
-
         number_of_turns += 1
         if number_of_turns == 100:
             break

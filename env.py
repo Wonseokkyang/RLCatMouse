@@ -225,7 +225,8 @@ class Maze:
             # if DRAW_MAZE:
             #     agent.shapeObj.move(dx*UNIT,dy*UNIT)
             #     time.sleep(SPEED)
-            agent.pos = (x+dx, y+dy)    #pos only gets updated on valid move
+            agent.updatePos(x+dx, y+dy)    #pos only gets updated on valid move
+            print('Updated agent.pos to', agent.pos)
             agent.reward = MOVE
         # print(agent.name, ', reward', agent.pos, agent.reward )
     ## end moveAgent
@@ -293,4 +294,7 @@ class Maze:
             self.shapeObj.undraw()
             self.shapeObj.draw(window)
         ## end redraw
+        # Set agent pos
+        def updatePos(self, x, y):
+            self.pos = (x, y)
     ## end class Agent
