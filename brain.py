@@ -123,13 +123,41 @@ class Brain:
                         else:
                             snapshot += square
         print('Snapshot:', snapshot)
-
         # add in mouse/cheese/cat by checking visibility w/ a function
         # check to see if there's a wall obscuring the mouse/cat 's vision from seeing the cheese/mouse/cat
             # true- keep obscured agent out of snapshot
             # false- include agent in snapshot
         return snapshot
     ## end hasProcess
+
+    # Calculate reward for the last move performed from history stack 
+    # and update q-table.
+    # Return: reward * discount factor
+    def learnStep(self, step, reward):
+        # Get last move's value or set it to 0 if it doesnt exist
+        lastState, lastAction = step
+        values = self.q_table.get(lastState, [0] * len(self.actions))
+        self.q_table.update({lastState : values})
+        # Update state:action for that one action
+        # learning rate * (discount factor * reward - current value at that action)
+        self.q_table[lastState][lastAction] += self.alpha * (
+            self.gamma * reward - self.q_table[lastState][lastAction])
+        print('specific value after update-', self.q_table[lastState][lastAction])
+        return reward * self.gamma
+    ## end learnStep
+
+    # Calculate and update for all steps taken in self.history
+    def learnAll(self, reward):
+        newReward = reward
+        for _ in range(len(self.history)):
+            newReward = self.learnStep(self.history.pop(), newReward)
+        print('History after learnAll finishs:', self.history)
+    ## end learnAll
+
+    # Wrapper to call learnStep from outside class
+    def learnLast(self, reward):
+        self.learnStep(self.history[len(self.history)-1], reward)
+    ## end learnLast
 
     # Update self info with given info from board/main program
     def updateBrain(self, catPos, catReward, mousePos, mouseReward):

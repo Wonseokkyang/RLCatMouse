@@ -53,7 +53,8 @@ def main():
 
         print('Calling mouse.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         mouseAction = myMouse.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
-        env.moveMouse(mouseAction)
+        immediateReward = env.moveMouse(mouseAction)
+        print('immediate reward:', immediateReward)
 
         # print('Calling cat.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         # catAction = myCat.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
@@ -65,6 +66,13 @@ def main():
         # myCat.updateBrain(catPos, catReward, mousePos, mouseReward)
         myMouse.updateBrain(catPos, catReward, mousePos, mouseReward)
 
+        print('myMouse.q_table', myMouse.q_table)
+        #immediate learning of step taken
+        myMouse.learnLast(immediateReward)
+
+        #if something got caught, execute learning of agents
+        # if done: 
+        #     myMouse.learnAll(mouseReward)
 
         env.win.getMouse()
         

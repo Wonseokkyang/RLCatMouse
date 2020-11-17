@@ -40,6 +40,8 @@
 #   DECISION: cat and mouse move "at the same time" and a turnEnd()
 #   function will serve as a neat packer to pass the required values
 #
+#   TO DO:
+#   
 #   
 ########################################################################
 """
@@ -189,11 +191,11 @@ class Maze:
     ## end drawMaze
 
     # Move the graphical rep of agent in direction_num, update pos,
-    # and calc update reward into Agent.reward
+    # and return immediate move reward
+    # Return: <int> immediate move reward
     def moveAgent(self, agent, direction_num):
         x, y = agent.pos
         print('x,y', x,y)
-        agent.reward = 0    # Reset reward value
         if direction_num == 0: dy, dx = 1, 0        # UP
         elif direction_num == 1: dy, dx = -1, 0     # DOWN
         elif direction_num == 2: dy, dx = 0, -1     # LEFT
@@ -208,7 +210,7 @@ class Maze:
             #     time.sleep(SPEED/4)
             #     agent.redraw(self.win)
             #     time.sleep(SPEED)
-            agent.reward = OUT_OF_FRAME
+            reward = OUT_OF_FRAME
         # Agent hit a wall- blink agent on wall before resetting
         elif self.mazeList[x+dx][y+dy] == '#':
             if ANNOUNCE_AGENT_MOVES: 
@@ -218,7 +220,7 @@ class Maze:
             #     agent.shapeObj.move(dx*UNIT,dy*UNIT)    
             #     agent.blink(self.win)
             #     agent.redraw(self.win)
-            agent.reward = WALL
+            reward = WALL
         # Agent landed on regular tile
         else:
             if ANNOUNCE_AGENT_MOVES: print(agent.name,'moved.')
@@ -227,16 +229,17 @@ class Maze:
             #     time.sleep(SPEED)
             agent.updatePos(x+dx, y+dy)    #pos only gets updated on valid move
             print('Updated agent.pos to', agent.pos)
-            agent.reward = MOVE
+            reward = MOVE
+        return reward
         # print(agent.name, ', reward', agent.pos, agent.reward )
     ## end moveAgent
 
     ## Wrappers for moving agents- calls moveAgent
     def moveMouse(self, direction_num):
-        self.moveAgent(self.mouse, direction_num)
+        return self.moveAgent(self.mouse, direction_num)
     ## end moveMouse
     def moveCat(self, direction_num):
-        self.moveAgent(self.cat, direction_num)
+        return self.moveAgent(self.cat, direction_num)
     ## end moveCat
 
     # Check to see if the current environment is done
