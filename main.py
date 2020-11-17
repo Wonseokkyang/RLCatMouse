@@ -48,11 +48,11 @@ def main():
 #1-step with cat
     while True:
         print('==At start of loop, cat and mouse information:==')
-        myCat.printInfo()
+        # myCat.printInfo()
         myMouse.printInfo()
 
-        print('Calling mouse.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
-        mouseAction = myMouse.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
+        # print('Calling mouse.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
+        mouseAction = myMouse.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
         immediateReward = env.moveMouse(mouseAction)
         print('immediate reward:', immediateReward)
 
@@ -78,8 +78,10 @@ def main():
             myMouse.learnAll(mouseReward)
             print('AFTER')
             print(myMouse.q_table)
+            env.restart()
 
-        env.win.getMouse()
+
+        # env.win.getMouse()
         
         number_of_turns += 1
         if number_of_turns == 100:

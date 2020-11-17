@@ -134,6 +134,7 @@ class Maze:
         self.cat.undraw(self.win)
         self.mouse.undraw(self.win)
         self.cheese.undraw(self.win)
+        time.sleep(SPEED/4)
         mx, my = self.mouse.pos
         cx, cy = self.cat.pos
         chx, chy = self.cheese.pos
@@ -164,8 +165,8 @@ class Maze:
         self.cheese.undraw(self.win)
 
         # Agent(s) objct positions init, starting positions
-        self.mouse.pos = (0, 0)   # Always start at 0,0
-        self.cat.pos = (self.rowsize-1, self.colsize-1)
+        # self.mouse.pos = (0, 0)   # Always start at 0,0
+        # self.cat.pos = (self.rowsize-1, self.colsize-1)
         # Random position on board
         self.cheese.pos = (random.randint(0,self.rowsize-1), 
                           random.randint(0,self.colsize-1))  

@@ -99,6 +99,40 @@ class Brain:
         return action
     ##end chooseRandom
 
+    # Given envState and agent objects, choose best action
+    # Return: Action with highest q-value
+    def chooseAction(self, envState, catPos, mousePos, cheesePos):
+        if self.name == 'Mouse': self.pos = mousePos
+        else: self.pos = catPos
+
+        # Pick direction that will get you into a state with the
+        # highest q-value.
+        #for all actions, simulate the state if you were to move in
+        #that direction
+        hashed = self.hashProcess(
+            envState, catPos, mousePos, cheesePos)
+        actionChoices = self.q_table.get(hashed, [0] * len(self.actions))
+        maxPool = []
+        maxVal = -999
+        for indx, val in enumerate(actionChoices):
+            if val == maxVal:
+                maxPool.append(indx)
+            if val > maxVal:
+                maxPool.clear()
+                maxVal = val
+                maxPool.append(indx)
+        print('after populating maxPool:', maxPool)
+
+        action = max(maxPool)
+
+        print('Action pool:', actionChoices)
+        print('Chosen action index =', action)
+        # Tuple of (state, action)
+        self.history.append(
+            (self.hashProcess(
+                envState, catPos, mousePos, cheesePos), action))
+        return action
+
     # Given curr board, init q-table a board snapshot according to vDist
     # and return the hashed 1d string of snapshot for tracking
     # Return: string representing envState reduced to view distance of agent
@@ -136,10 +170,17 @@ class Brain:
         lastState, lastAction = step
         values = self.q_table.get(lastState, [0] * len(self.actions))
         self.q_table.update({lastState : values})
+
+        print('specific value before update-', self.q_table[lastState][lastAction])
+
+
         # Update state:action for that one action
         # learning rate * (discount factor * reward - current value at that action)
         self.q_table[lastState][lastAction] += self.alpha * (
             self.gamma * reward - self.q_table[lastState][lastAction])
+
+
+        print('for step reward:', step, reward)
         print('specific value after update-', self.q_table[lastState][lastAction])
         return reward * self.gamma
     ## end learnStep
