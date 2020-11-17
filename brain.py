@@ -80,9 +80,15 @@ class Brain:
         self.gamma = gamma
         self.epsilon = epsilon
         self.q_table = {}   #key : snapshot of n area around agent. value : cardinal directions
+        self.history = []
         self.name = name    #mainly for troubleshooting
         self.pos = pos
-        self.history = []
+        if name == 'Cat':
+            self.symbol = 'C'
+        elif name == 'Mouse':
+            self.symbol = 'm'
+        else:
+            self.symbold = '?'
     ## end __init__
 
     # Given envState and agent objects, choose a random direction number to return
@@ -91,9 +97,11 @@ class Brain:
         if self.name == 'Mouse': self.pos = mousePos
         else: self.pos = catPos
 
-        self.history.append(self.hashProcess(
-                            envState, catPos, mousePos, cheesePos))
         action = self.actions[random.randint(0, len(self.actions)-1)]
+        # Tuple of (state, action)
+        self.history.append(
+            (self.hashProcess(
+                envState, catPos, mousePos, cheesePos), action))
         return action
     ##end chooseRandom
 
@@ -108,20 +116,24 @@ class Brain:
                 tempRow = []
                 for colNum, square in enumerate(row):
                     if colNum <= y + VIEW_DISTANCE and colNum >= y - VIEW_DISTANCE:
-                        tempRow.append(square)
+                        if ((rowNum, colNum) == self.pos): 
+                            tempRow.append(self.symbol)
+                        elif square == ' ':
+                            tempRow.append(0)
+                        else:
+                            tempRow.append(square)
                 snapshot.append(tempRow)
 
-        print('Snapshot:', snapshot)
+        print('Snapshot:', str(np.reshape(snapshot, -1)))
         #print snapshot
-        # for x, row in enumerate(snapshot):
-        #     for y, value in enumerate(row):
-        #         print('(', x, ',', y, ')', value)
+        for row in snapshot:
+            print(row)
 
-        # add in mouse, cheese, cat
+        # add in mouse/cheese/cat by checking visibility w/ a function
         # check to see if there's a wall obscuring the mouse/cat 's vision from seeing the cheese/mouse/cat
             # true- keep obscured agent out of snapshot
             # false- include agent in snapshot
-        return snapshot
+        return str(np.reshape(snapshot, -1))
     ## end hasProcess
 
     # Update self info with given info from board/main program

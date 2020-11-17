@@ -239,6 +239,8 @@ class Maze:
         self.moveAgent(self.cat, direction_num)
     ## end moveCat
 
+    # Check to see if the current environment is done
+    # Return: The positions reward values of the agents and a done flag
     # The cat catching the mouse and the mouse getting 
     # the cheese in the same turn is possible
     def turnEnd(self):
@@ -254,6 +256,7 @@ class Maze:
             self.mouse.reward += TARGET
             done = True
         return self.cat.pos, self.cat.reward, self.mouse.pos, self.mouse.reward, done
+    ## end turnEnd
 
     # Agent class initialized in initAgents() 
     class Agent:
