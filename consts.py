@@ -21,7 +21,7 @@
 
 # Name of txt file to create the learning environment
 # Located in ./mazetxt
-FILE_NAME = 'blank5x5wall'
+FILE_NAME = 'blank3x3'
 
 # Draw the graphical window to show the agent(s) in action.
 DRAW_MAZE = True

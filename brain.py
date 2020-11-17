@@ -83,12 +83,6 @@ class Brain:
         self.history = []
         self.name = name    #mainly for troubleshooting
         self.pos = pos
-        if name == 'Cat':
-            self.symbol = 'C'
-        elif name == 'Mouse':
-            self.symbol = 'm'
-        else:
-            self.symbold = '?'
     ## end __init__
 
     # Given envState and agent objects, choose a random direction number to return
@@ -116,8 +110,12 @@ class Brain:
             if rowNum <= x + VIEW_DISTANCE and rowNum >= x - VIEW_DISTANCE:
                 for colNum, square in enumerate(row):
                     if colNum <= y + VIEW_DISTANCE and colNum >= y - VIEW_DISTANCE:
-                        if ((rowNum, colNum) == self.pos): 
-                            snapshot += self.symbol
+                        if (rowNum, colNum) == catPos: 
+                            snapshot += 'C'
+                        elif (rowNum, colNum) == mousePos: 
+                            snapshot += 'm'
+                        elif (rowNum, colNum) == cheesePos: 
+                            snapshot += '*'
                         elif square == ' ':
                             snapshot += '-'
                         else:
@@ -128,7 +126,7 @@ class Brain:
             # true- keep obscured agent out of snapshot
             # false- include agent in snapshot
         return snapshot
-    ## end hasProcess
+    ## end hashProcess
 
     # Calculate reward for the last move performed from history stack 
     # and update q-table.

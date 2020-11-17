@@ -149,7 +149,6 @@ class Maze:
                 Oval(Point(chx*UNIT+UNIT/4, chy*UNIT+UNIT/4), 
                 Point(chx*UNIT+UNIT-UNIT/4, chy*UNIT+UNIT-UNIT/4)), 
                 "yellow", self.cheese.pos, "Cheese")
-
         self.mouse.redraw(self.win)
         self.cat.redraw(self.win)
         self.cheese.redraw(self.win)

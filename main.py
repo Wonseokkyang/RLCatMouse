@@ -72,7 +72,12 @@ def main():
 
         #if something got caught, execute learning of agents
         if done: 
+            print('Hit something')
+            print('mouse q-table before learnAll')
+            print(myMouse.q_table)
             myMouse.learnAll(mouseReward)
+            print('AFTER')
+            print(myMouse.q_table)
 
         env.win.getMouse()
         
