@@ -106,34 +106,29 @@ class Brain:
     ##end chooseRandom
 
     # Given curr board, init q-table a board snapshot according to vDist
-    # and return the hashed 1d list of snapshot for tracking
+    # and return the hashed 1d string of snapshot for tracking
+    # Return: string representing envState reduced to view distance of agent
     def hashProcess(self, envState, catPos, mousePos, cheesePos):
         # given the current board, extract the board snapshot around the agent of VIEW_DISTANCE
         x,y = self.pos
-        snapshot = []
+        snapshot = ''
         for rowNum, row in enumerate(envState):
             if rowNum <= x + VIEW_DISTANCE and rowNum >= x - VIEW_DISTANCE:
-                tempRow = []
                 for colNum, square in enumerate(row):
                     if colNum <= y + VIEW_DISTANCE and colNum >= y - VIEW_DISTANCE:
                         if ((rowNum, colNum) == self.pos): 
-                            tempRow.append(self.symbol)
+                            snapshot += self.symbol
                         elif square == ' ':
-                            tempRow.append(0)
+                            snapshot += '-'
                         else:
-                            tempRow.append(square)
-                snapshot.append(tempRow)
-
-        print('Snapshot:', str(np.reshape(snapshot, -1)))
-        #print snapshot
-        for row in snapshot:
-            print(row)
+                            snapshot += square
+        print('Snapshot:', snapshot)
 
         # add in mouse/cheese/cat by checking visibility w/ a function
         # check to see if there's a wall obscuring the mouse/cat 's vision from seeing the cheese/mouse/cat
             # true- keep obscured agent out of snapshot
             # false- include agent in snapshot
-        return str(np.reshape(snapshot, -1))
+        return snapshot
     ## end hasProcess
 
     # Update self info with given info from board/main program
