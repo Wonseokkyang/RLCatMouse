@@ -205,28 +205,15 @@ class Maze:
             y+dy < 0 or y+dy > self.colsize-1):
             if ANNOUNCE_AGENT_MOVES: 
                 print(agent.name,'went out of bounds')
-            # if DRAW_MAZE:
-            #     agent.undraw(self.win)
-            #     time.sleep(SPEED/4)
-            #     agent.redraw(self.win)
-            #     time.sleep(SPEED)
             reward = OUT_OF_FRAME
         # Agent hit a wall- blink agent on wall before resetting
         elif self.mazeList[x+dx][y+dy] == '#':
             if ANNOUNCE_AGENT_MOVES: 
                 print(agent.name, 'hit a wall')
-            # if DRAW_MAZE:
-            #     # Graphically move on screen but dont update agent pos
-            #     agent.shapeObj.move(dx*UNIT,dy*UNIT)    
-            #     agent.blink(self.win)
-            #     agent.redraw(self.win)
             reward = WALL
         # Agent landed on regular tile
         else:
             if ANNOUNCE_AGENT_MOVES: print(agent.name,'moved.')
-            # if DRAW_MAZE:
-            #     agent.shapeObj.move(dx*UNIT,dy*UNIT)
-            #     time.sleep(SPEED)
             agent.updatePos(x+dx, y+dy)    #pos only gets updated on valid move
             print('Updated agent.pos to', agent.pos)
             reward = MOVE

@@ -66,13 +66,13 @@ def main():
         # myCat.updateBrain(catPos, catReward, mousePos, mouseReward)
         myMouse.updateBrain(catPos, catReward, mousePos, mouseReward)
 
-        print('myMouse.q_table', myMouse.q_table)
         #immediate learning of step taken
         myMouse.learnLast(immediateReward)
+        print('myMouse.q_table after learnLast', myMouse.q_table)
 
         #if something got caught, execute learning of agents
-        # if done: 
-        #     myMouse.learnAll(mouseReward)
+        if done: 
+            myMouse.learnAll(mouseReward)
 
         env.win.getMouse()
         
