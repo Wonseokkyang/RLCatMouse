@@ -63,6 +63,14 @@
 # 
 #   Perhaps instead of vision distance we do depth distance, simulating
 #   the agent 
+#
+#   CURRENT: 1:45am - 11/17
+#   1. reward function evaluates out of bounds moves as positive if
+#   the agent has went out of bounds in it's history and triggered
+#   the done flag somewhere along the line
+#   2. was testing running the mouse and found an instance where it goes
+#   in an infinite loop. this is without rolling for epsilon. find out
+#   why exactly this is happening
 ########################################################################
 """
 import random

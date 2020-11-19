@@ -21,7 +21,7 @@
 
 # Name of txt file to create the learning environment
 # Located in ./mazetxt
-FILE_NAME = 'blank3x3'
+FILE_NAME = 'blank5x5wall'
 
 # Draw the graphical window to show the agent(s) in action.
 DRAW_MAZE = True
@@ -40,7 +40,7 @@ CYCLES = 1
 OUT_OF_FRAME = -100.0   #out of bounds penalty
 WALL = -10.0            #hitting a wall penalty
 MOVE = -0.1             #moving into a square penalty
-TARGET = 100.0          #finding the end of the maze reward
+TARGET = 20.0          #finding the end of the maze reward
 CAUGHT = TARGET         #reward for mouse reaching cheese and/or cat reaching mouse
 
 # Math values
