@@ -140,7 +140,7 @@ class Maze:
         self.cat.undraw(self.win)
         self.mouse.undraw(self.win)
         self.cheese.undraw(self.win)
-        time.sleep(SPEED/4)
+        time.sleep(SPEED/10)
         mx, my = self.mouse.pos
         cx, cy = self.cat.pos
         chx, chy = self.cheese.pos
@@ -180,7 +180,10 @@ class Maze:
         #         or self.cheese.pos == self.cat.pos):
         #     self.cheese.pos = (random.randint(0,self.rowsize-1), 
         #                       random.randint(0,self.colsize-1))
+        self.mouse.pos = (0,0)
         self.cheese.pos = (3, 3)
+        self.cat.pos = (self.rowsize-1, self.colsize-1)
+        
         if DRAW_MAZE: self.redrawAgents()
     ## end restart
 

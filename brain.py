@@ -53,16 +53,8 @@
 ##                          Notes                                     ##
 ########################################################################
 #   Problem I'm facing: 
-#   So I can implement a snapshot of the agent's surroundings to add
-#   to ass to the q-table but how about the walls and out of bounds?
-#   I was initially planning on having the agents run until an end
-#   condition is met but then how would I update the agent's penalty for
-#   running out of frame?
-#   I could possibly call the learning function early if the agent's
-#   reward isn't 0 in the main body of the program.
-# 
 #   Perhaps instead of vision distance we do depth distance, simulating
-#   the agent 
+#   the agent..
 #
 #   CURRENT: 1:45am - 11/17
 #   1. reward function evaluates out of bounds moves as positive if
@@ -75,6 +67,8 @@
 #   TODO:
 #   hashProx() needs a function to check of vision
 #   chooeseAction() needs epsilon function for explore vs exploite
+#   chooseEnv and chooseSnapshot are similar and can be combined/condensed
+#   into single function with an upper wrapper function.
 ########################################################################
 """
 import random
@@ -125,10 +119,13 @@ class Brain:
         hashedBoard = str(catPos + mousePos + cheesePos)
 
         if self.name == 'Mouse': 
-            return self.chooseMouse(mousePos, hashedProx, hashedBoard)
+            action = self.chooseMouse(mousePos, hashedProx, hashedBoard)
         else: 
-            return self.chooseCat(catPos, hashedProx, hashedBoard)
+            action = self.chooseCat(catPos, hashedProx, hashedBoard)
 
+        self.history.append((hashedBoard, action))
+        self.proxHistory.append((hashedProx, action))
+        return action
         #function to check if cat/cheese is in range
         # if they are, use snapshot
         # if not, learn from and clear history stack
@@ -137,23 +134,26 @@ class Brain:
     def chooseCat(self, catPos, hashedProx, hashedBoard):
         # Update agent's memory on where it is on the board now
         self.pos = catPos
-        if 'm' in hashed:   #mouse is within cat's vision
+        if 'm' in hashedProx:   #mouse is within cat's vision
             return self.chooseSnapshot(hashedProx)
         else:   #use regular q_table
             return self.chooseEnv(hashedBoard)
+    ## end chooseMouse
 
     def chooseMouse(self, mousePos, hashedProx, hashedBoard):
         # Update agent's memory on where it is on the board now
         self.pos = mousePos
-        if 'C' in hashed:   #cat is within mouse's vision
+        if 'C' in hashedProx:   #cat is within mouse's vision
             return self.chooseSnapshot(hashedProx)
         else:   #use regular q_table
             return self.chooseEnv(hashedBoard)
+    ## end chooseMouse
 
     # Choose a move based on q_table
     def chooseEnv(self, hashedBoard):
         values = self.q_table.get(hashedBoard)
         if values == None:
+            print('choosing random action from chooseEnv')
             return random.randint(0, len(self.actions)-1)
         else:
             maxPool = []
@@ -167,10 +167,9 @@ class Brain:
                     maxPool.append(indx)
             print('after populating maxPool:', maxPool)
             #choose random from pool of indexes
-            action = random.randint(len(maxPool)-1)
-            print('Action pool:', actionChoices)
+            action = maxPool[random.randint(0, len(maxPool)-1)]
+            print('Action pool:', values)
             print('Chosen action index =', action)
-            self.history.append(hashedBoard, action))
             return action
     ## end chooseEnv
 
@@ -194,12 +193,10 @@ class Brain:
                     maxPool.append(indx)
             print('after populating maxPool:', maxPool)
 
-            action = random.randint(0, len(maxPool)-1)
+            action = maxPool[random.randint(0, len(maxPool)-1)]
 
             print('Action pool:', actionChoices)
             print('Chosen action index =', action)
-            # Tuple of (state, action)
-            self.proxHistory.append(hashed, action))
             return action
 
     # Given curr board, return snapshot of the proximity around the agent
@@ -232,25 +229,25 @@ class Brain:
 
 
     # Calculate reward for the last move performed from history stack 
-    # and update q-table.
+    # and update corresponding q-table.
     # Return: reward * discount factor
-    def learnStep(self, step, reward):
+    def learnStep(self, step, reward, table):
         # Get last move's value or set it to 0 if it doesnt exist
         lastState, lastAction = step
-        values = self.q_table.get(lastState, [0] * len(self.actions))
-        self.q_table.update({lastState : values})
+        values = table.get(lastState, [0] * len(self.actions))
+        table.update({lastState : values})
 
-        print('specific value before update-', self.q_table[lastState][lastAction])
-
+        print('lastState-', lastState)
+        print('specific value before update-', table[lastState][lastAction])
 
         # Update state:action for that one action
         # learning rate * (discount factor * reward - current value at that action)
-        self.q_table[lastState][lastAction] += self.alpha * (
-            self.gamma * reward - self.q_table[lastState][lastAction])
+        table[lastState][lastAction] += self.alpha * (
+            self.gamma * reward - table[lastState][lastAction])
 
 
         print('for step reward:', step, reward)
-        print('specific value after update-', self.q_table[lastState][lastAction])
+        print('specific value after update-', table[lastState][lastAction])
         return reward * self.gamma
     ## end learnStep
 
@@ -258,13 +255,19 @@ class Brain:
     def learnAll(self, reward):
         newReward = reward
         for _ in range(len(self.history)):
-            newReward = self.learnStep(self.history.pop(), newReward)
+            newReward = self.learnStep(self.history.pop(), newReward, self.q_table)
         print('History after learnAll finishs:', self.history)
+        
+        newReward = reward
+        for _ in range(len(self.proxHistory)):
+            newReward = self.learnStep(self.proxHistory.pop(), newReward, self.proxTable)
+        print('proxHistory after learnAll finishs:', self.proxHistory)
     ## end learnAll
 
     # Wrapper to call learnStep from outside class
     def learnLast(self, reward):
-        self.learnStep(self.history[len(self.history)-1], reward)
+        self.learnStep(self.history[len(self.history)-1], reward, self.q_table)
+        self.learnStep(self.proxHistory[len(self.proxHistory)-1], reward, self.proxTable)
     ## end learnLast
 
     # Update self info with given info from board/main program

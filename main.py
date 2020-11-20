@@ -47,26 +47,32 @@ def main():
 #1-step with cat
     while True:
         print('==At start of loop, cat and mouse information:==')
-        # myCat.printInfo()
+        myCat.printInfo()
         myMouse.printInfo()
 
         # print('Calling mouse.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         mouseAction = myMouse.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
-        immediateReward = env.moveMouse(mouseAction)
-        print('immediate reward:', immediateReward)
+        mouseImmediateReward = env.moveMouse(mouseAction)
+        print('mosueAction:', mouseAction)
+        print('immediate reward:', mouseImmediateReward)
 
         # print('Calling cat.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
-        # catAction = myCat.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
-        # env.moveCat(catAction)
+        catAction = myCat.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
+        catImmediateReward = env.moveCat(catAction)
+        print('catAction:', catAction)
+        print('immediate reward:', catImmediateReward)
 
+        #get feedback from the environment
         catPos, catReward, mousePos, mouseReward, done = env.turnEnd()
 
         # Update agent's brains to reflect current board positions
-        # myCat.updateBrain(catPos, catReward, mousePos, mouseReward)
         myMouse.updateBrain(catPos, catReward, mousePos, mouseReward)
+        myCat.updateBrain(catPos, catReward, mousePos, mouseReward)
 
         #immediate learning of step taken
-        myMouse.learnLast(immediateReward)
+        myMouse.learnLast(mouseImmediateReward)
+        myCat.learnLast(catImmediateReward)
+
         print('myMouse.q_table after learnLast', myMouse.q_table)
 
         #if something got caught, execute learning of agents
