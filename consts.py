@@ -28,7 +28,7 @@ DRAW_MAZE = True
 # Print agent's moves in terminal
 ANNOUNCE_AGENT_MOVES = True
 # Number of seconds to pause after drawing (refresh rate)
-SPEED = 0.5
+SPEED = 0.05
 
 # Pixel size of individual squares in the environment
 UNIT = 30

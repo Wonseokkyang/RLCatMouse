@@ -33,9 +33,11 @@ from brain import Brain
 from consts import FILE_NAME    #file to pull/generate env from
 from consts import DRAW_MAZE    #flag to show graphic window
 from consts import ALPHA as alpha, GAMMA as gamma, EPSILON as epsilon
+from consts import SPEED
 
 def main():
     number_of_turns = 0
+    catchCount = 0
     env = Maze(FILE_NAME)
     # myCat = Brain(env.actions, alpha, gamma, epsilon)
 # def __init__(self, name, pos, actions, given_alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON):
@@ -57,7 +59,7 @@ def main():
         print('immediate reward:', mouseImmediateReward)
 
         # print('Calling cat.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
-        catAction = myCat.chooseRandom(board, myCat.pos, myMouse.pos, cheesePos)
+        catAction = myCat.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
         catImmediateReward = env.moveCat(catAction)
         print('catAction:', catAction)
         print('immediate reward:', catImmediateReward)
@@ -73,23 +75,28 @@ def main():
         myMouse.learnLast(mouseImmediateReward)
         myCat.learnLast(catImmediateReward)
 
-        print('myMouse.q_table after learnLast', myMouse.q_table)
+        print('\nmyMouse.q_table after learnLast', myMouse.q_table)
+        print('\nmyCat.q_table after learnLast', myCat.q_table)
 
         #if something got caught, execute learning of agents
         if done: 
+            catchCount += 1
             print('Hit something')
             print('mouse q-table before learnAll')
             print(myMouse.q_table)
             myMouse.learnAll(mouseReward)
-            print('AFTER')
+            myCat.learnAll(catReward)
+            print('=AFTER=')
             print(myMouse.q_table)
+            print(myCat.q_table)
             env.restart()
-
-
         # env.win.getMouse()
-        
         number_of_turns += 1
-        if number_of_turns == 100:
+        # if number_of_turns == 100:
+            # break
+        if catchCount == 500:
+            SPEED = 0.5
+        if catchCount == 501:
             break
 
 
