@@ -47,7 +47,7 @@
 ########################################################################
 """
 from graphics import *  
-from consts import SPEED, DRAW_MAZE, UNIT, OUT_OF_FRAME, WALL, MOVE, TARGET, ANNOUNCE_AGENT_MOVES, CAUGHT
+from consts import SPEED, DRAW_MAZE, UNIT, OUT_OF_FRAME, WALL, MOVE, TARGET, ANNOUNCE_AGENT_MOVES, CAUGHT, CHEESEPOS
 import random
 
 
@@ -115,7 +115,7 @@ class Maze:
         #     cheesepos = (random.randint(0,self.rowsize-1), 
         #                 random.randint(0,self.colsize-1))
         
-        cheesepos = (3, 3)  #static cheese for testing
+        cheesepos = CHEESEPOS  #static cheese for testing
 
         mx, my = mousepos
         cx, cy = catpos
@@ -140,7 +140,7 @@ class Maze:
         self.cat.undraw(self.win)
         self.mouse.undraw(self.win)
         self.cheese.undraw(self.win)
-        time.sleep(SPEED/10)
+        # time.sleep(SPEED/10)
         mx, my = self.mouse.pos
         cx, cy = self.cat.pos
         chx, chy = self.cheese.pos
@@ -181,9 +181,9 @@ class Maze:
         #     self.cheese.pos = (random.randint(0,self.rowsize-1), 
         #                       random.randint(0,self.colsize-1))
         self.mouse.pos = (0,0)
-        self.cheese.pos = (3, 3)
+        self.cheese.pos = CHEESEPOS
         self.cat.pos = (self.rowsize-1, self.colsize-1)
-        
+
         if DRAW_MAZE: self.redrawAgents()
     ## end restart
 

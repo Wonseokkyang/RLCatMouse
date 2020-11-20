@@ -36,6 +36,7 @@ from consts import ALPHA as alpha, GAMMA as gamma, EPSILON as epsilon
 from consts import SPEED
 
 def main():
+    DRAW_MAZE = False
     number_of_turns = 0
     catchCount = 0
     env = Maze(FILE_NAME)
@@ -75,11 +76,12 @@ def main():
         myMouse.learnLast(mouseImmediateReward)
         myCat.learnLast(catImmediateReward)
 
-        print('\nmyMouse.q_table after learnLast', myMouse.q_table)
-        print('\nmyCat.q_table after learnLast', myCat.q_table)
+        # print('\nmyMouse.q_table after learnLast', myMouse.q_table)
+        # print('\nmyCat.q_table after learnLast', myCat.q_table)
 
         #if something got caught, execute learning of agents
         if done: 
+            time.sleep(1)
             catchCount += 1
             print('Hit something')
             print('mouse q-table before learnAll')
@@ -87,15 +89,14 @@ def main():
             myMouse.learnAll(mouseReward)
             myCat.learnAll(catReward)
             print('=AFTER=')
-            print(myMouse.q_table)
-            print(myCat.q_table)
+            # print(myMouse.q_table)
+            # print(myCat.q_table)
             env.restart()
         # env.win.getMouse()
         number_of_turns += 1
         # if number_of_turns == 100:
             # break
-        if catchCount == 500:
-            SPEED = 0.5
+            
         if catchCount == 501:
             break
 

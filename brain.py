@@ -69,6 +69,7 @@
 #   chooeseAction() needs epsilon function for explore vs exploite
 #   chooseEnv and chooseSnapshot are similar and can be combined/condensed
 #   into single function with an upper wrapper function.
+#   Change q-table so the agents dont know of each other
 ########################################################################
 """
 import random
@@ -85,7 +86,7 @@ class Brain:
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
-        self.q_table = {}   #board:
+        self.q_table = {}   #board: (cat, mouse, cheese) -> mouse:(mouse, cheese) cat:(cat)
         self.proxTable = {} #key : snapshot of n area around agent. value : cardinal directions
         self.proxHistory = []
         self.history = []
@@ -114,17 +115,18 @@ class Brain:
         ##$$ ADD EPSILON FUNCTION HERE
         #if roll for epsilon: chooseRandom()
         #else: do below
-        hashedProx = self.hashProx(
-            envState, catPos, mousePos, cheesePos)
-        hashedBoard = str(catPos + mousePos + cheesePos)
+        # Roll to see agent chooses to explore or not
+        if np.random.uniform() > self.epsilon:
+            action = random.randint(0, lan(self.actions)-1)
+        else:
+            hashedProx = self.hashProx(
+                envState, catPos, mousePos, cheesePos)
+            hashedBoard = str(catPos + mousePos + cheesePos)
 
-        if self.name == 'Mouse': 
-            action = self.chooseMouse(mousePos, hashedProx, hashedBoard)
-        else: 
-            action = self.chooseCat(catPos, hashedProx, hashedBoard)
-
-        self.history.append((hashedBoard, action))
-        self.proxHistory.append((hashedProx, action))
+            if self.name == 'Mouse': 
+                action = self.chooseMouse(mousePos, hashedProx, hashedBoard)
+            else: 
+                action = self.chooseCat(catPos, hashedProx, hashedBoard)
         return action
         #function to check if cat/cheese is in range
         # if they are, use snapshot
@@ -165,11 +167,9 @@ class Brain:
                     maxPool.clear()
                     maxVal = val
                     maxPool.append(indx)
-            print('after populating maxPool:', maxPool)
             #choose random from pool of indexes
             action = maxPool[random.randint(0, len(maxPool)-1)]
-            print('Action pool:', values)
-            print('Chosen action index =', action)
+            self.history.append((hashedBoard, action))
             return action
     ## end chooseEnv
 
@@ -191,13 +191,10 @@ class Brain:
                     maxPool.clear()
                     maxVal = val
                     maxPool.append(indx)
-            print('after populating maxPool:', maxPool)
-
             action = maxPool[random.randint(0, len(maxPool)-1)]
-
-            print('Action pool:', actionChoices)
-            print('Chosen action index =', action)
+            self.proxHistory.append((hashed, action))
             return action
+    # end chooseSnapshot
 
     # Given curr board, return snapshot of the proximity around the agent
     # Return: string representing envState reduced to view distance of agent
@@ -244,7 +241,6 @@ class Brain:
         # learning rate * (discount factor * reward - current value at that action)
         table[lastState][lastAction] += self.alpha * (
             self.gamma * reward - table[lastState][lastAction])
-
 
         print('for step reward:', step, reward)
         print('specific value after update-', table[lastState][lastAction])
