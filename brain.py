@@ -71,6 +71,10 @@
 #   2. was testing running the mouse and found an instance where it goes
 #   in an infinite loop. this is without rolling for epsilon. find out
 #   why exactly this is happening
+
+#   TODO:
+#   hashProx() needs a function to check of vision
+#   chooeseAction() needs epsilon function for explore vs exploite
 ########################################################################
 """
 import random
@@ -87,7 +91,9 @@ class Brain:
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
-        self.q_table = {}   #key : snapshot of n area around agent. value : cardinal directions
+        self.q_table = {}   #board:
+        self.proxTable = {} #key : snapshot of n area around agent. value : cardinal directions
+        self.proxHistory = []
         self.history = []
         self.name = name    #mainly for troubleshooting
         self.pos = pos
@@ -96,55 +102,109 @@ class Brain:
     # Given envState and agent objects, choose a random direction number to return
     # Return: random direction
     def chooseRandom(self, envState, catPos, mousePos, cheesePos):
+        # Update agent's memory on where it is on the board now
         if self.name == 'Mouse': self.pos = mousePos
         else: self.pos = catPos
-
         action = self.actions[random.randint(0, len(self.actions)-1)]
         # Tuple of (state, action)
         self.history.append(
-            (self.hashProcess(
+            (self.hashProx(
                 envState, catPos, mousePos, cheesePos), action))
         return action
     ##end chooseRandom
 
     # Given envState and agent objects, choose best action
+    # If the prey/predator is within range, choose from snapshot
     # Return: Action with highest q-value
     def chooseAction(self, envState, catPos, mousePos, cheesePos):
-        if self.name == 'Mouse': self.pos = mousePos
-        else: self.pos = catPos
-
-        # Pick direction that will get you into a state with the
-        # highest q-value.
-        #for all actions, simulate the state if you were to move in
-        #that direction
-        hashed = self.hashProcess(
+        ##$$ ADD EPSILON FUNCTION HERE
+        #if roll for epsilon: chooseRandom()
+        #else: do below
+        hashedProx = self.hashProx(
             envState, catPos, mousePos, cheesePos)
-        actionChoices = self.q_table.get(hashed, [0] * len(self.actions))
-        maxPool = []
-        maxVal = -999
-        for indx, val in enumerate(actionChoices):
-            if val == maxVal:
-                maxPool.append(indx)
-            if val > maxVal:
-                maxPool.clear()
-                maxVal = val
-                maxPool.append(indx)
-        print('after populating maxPool:', maxPool)
+        hashedBoard = str(catPos + mousePos + cheesePos)
 
-        action = max(maxPool)
+        if self.name == 'Mouse': 
+            return self.chooseMouse(mousePos, hashedProx, hashedBoard)
+        else: 
+            return self.chooseCat(catPos, hashedProx, hashedBoard)
 
-        print('Action pool:', actionChoices)
-        print('Chosen action index =', action)
-        # Tuple of (state, action)
-        self.history.append(
-            (self.hashProcess(
-                envState, catPos, mousePos, cheesePos), action))
-        return action
+        #function to check if cat/cheese is in range
+        # if they are, use snapshot
+        # if not, learn from and clear history stack
+    ## end chooseAction
+    
+    def chooseCat(self, catPos, hashedProx, hashedBoard):
+        # Update agent's memory on where it is on the board now
+        self.pos = catPos
+        if 'm' in hashed:   #mouse is within cat's vision
+            return self.chooseSnapshot(hashedProx)
+        else:   #use regular q_table
+            return self.chooseEnv(hashedBoard)
 
-    # Given curr board, init q-table a board snapshot according to vDist
-    # and return the hashed 1d string of snapshot for tracking
+    def chooseMouse(self, mousePos, hashedProx, hashedBoard):
+        # Update agent's memory on where it is on the board now
+        self.pos = mousePos
+        if 'C' in hashed:   #cat is within mouse's vision
+            return self.chooseSnapshot(hashedProx)
+        else:   #use regular q_table
+            return self.chooseEnv(hashedBoard)
+
+    # Choose a move based on q_table
+    def chooseEnv(self, hashedBoard):
+        values = self.q_table.get(hashedBoard)
+        if values == None:
+            return random.randint(0, len(self.actions)-1)
+        else:
+            maxPool = []
+            maxVal = -999
+            for indx, val in enumerate(values):
+                if val == maxVal:
+                    maxPool.append(indx)
+                if val > maxVal:
+                    maxPool.clear()
+                    maxVal = val
+                    maxPool.append(indx)
+            print('after populating maxPool:', maxPool)
+            #choose random from pool of indexes
+            action = random.randint(len(maxPool)-1)
+            print('Action pool:', actionChoices)
+            print('Chosen action index =', action)
+            self.history.append(hashedBoard, action))
+            return action
+    ## end chooseEnv
+
+    # Pick direction that will get you into a state with the
+    # highest q-value and return it.
+    # Return: Action to transition to highest q-value state
+    def chooseSnapshot(self, hashed):
+        #Get action choices. If choices are empty, choose random
+        actionChoices = self.proxTable.get(hashed)
+        if actionChoices == None: 
+            return random.randint(0, len(self.actions)-1)
+        else:
+            maxPool = []
+            maxVal = -999
+            for indx, val in enumerate(actionChoices):
+                if val == maxVal:
+                    maxPool.append(indx)
+                if val > maxVal:
+                    maxPool.clear()
+                    maxVal = val
+                    maxPool.append(indx)
+            print('after populating maxPool:', maxPool)
+
+            action = random.randint(0, len(maxPool)-1)
+
+            print('Action pool:', actionChoices)
+            print('Chosen action index =', action)
+            # Tuple of (state, action)
+            self.proxHistory.append(hashed, action))
+            return action
+
+    # Given curr board, return snapshot of the proximity around the agent
     # Return: string representing envState reduced to view distance of agent
-    def hashProcess(self, envState, catPos, mousePos, cheesePos):
+    def hashProx(self, envState, catPos, mousePos, cheesePos):
         # given the current board, extract the board snapshot around the agent of VIEW_DISTANCE
         x,y = self.pos
         snapshot = ''
@@ -168,7 +228,8 @@ class Brain:
             # true- keep obscured agent out of snapshot
             # false- include agent in snapshot
         return snapshot
-    ## end hashProcess
+    ## end hashProx
+
 
     # Calculate reward for the last move performed from history stack 
     # and update q-table.

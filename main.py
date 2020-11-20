@@ -30,9 +30,8 @@
 import time
 from env import Maze
 from brain import Brain
-# from brain import Brain
-from consts import FILE_NAME    #file to pull/gen env from
-from consts import DRAW_MAZE    #flag to draw graphically
+from consts import FILE_NAME    #file to pull/generate env from
+from consts import DRAW_MAZE    #flag to show graphic window
 from consts import ALPHA as alpha, GAMMA as gamma, EPSILON as epsilon
 
 def main():

@@ -41,7 +41,8 @@
 #   function will serve as a neat packer to pass the required values
 #
 #   TO DO:
-#   Cheese spawning on 
+#   Cheese spawning on walls
+#   make a cfg.py file instead of consts.py
 #   
 ########################################################################
 """
@@ -105,12 +106,17 @@ class Maze:
     def initAgents(self):
         mousepos = (0,0)
         catpos = (self.rowsize-1, self.colsize-1)
+
+        #Move the block below into a function
         # Random position on board
-        cheesepos = (random.randint(0,self.rowsize-1), 
-                    random.randint(0,self.colsize-1))  
-        while (cheesepos == mousepos or cheesepos == catpos):
-            cheesepos = (random.randint(0,self.rowsize-1), 
-                        random.randint(0,self.colsize-1))
+        # cheesepos = (random.randint(0,self.rowsize-1), 
+        #             random.randint(0,self.colsize-1))  
+        # while (cheesepos == mousepos or cheesepos == catpos):
+        #     cheesepos = (random.randint(0,self.rowsize-1), 
+        #                 random.randint(0,self.colsize-1))
+        
+        cheesepos = (3, 3)  #static cheese for testing
+
         mx, my = mousepos
         cx, cy = catpos
         chx, chy = cheesepos
@@ -168,12 +174,13 @@ class Maze:
         # self.mouse.pos = (0, 0)   # Always start at 0,0
         # self.cat.pos = (self.rowsize-1, self.colsize-1)
         # Random position on board
-        self.cheese.pos = (random.randint(0,self.rowsize-1), 
-                          random.randint(0,self.colsize-1))  
-        while (self.cheese.pos == self.mouse.pos 
-                or self.cheese.pos == self.cat.pos):
-            self.cheese.pos = (random.randint(0,self.rowsize-1), 
-                              random.randint(0,self.colsize-1))
+        # self.cheese.pos = (random.randint(0,self.rowsize-1), 
+        #                   random.randint(0,self.colsize-1))  
+        # while (self.cheese.pos == self.mouse.pos 
+        #         or self.cheese.pos == self.cat.pos):
+        #     self.cheese.pos = (random.randint(0,self.rowsize-1), 
+        #                       random.randint(0,self.colsize-1))
+        self.cheese.pos = (3, 3)
         if DRAW_MAZE: self.redrawAgents()
     ## end restart
 
