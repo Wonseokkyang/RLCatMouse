@@ -76,6 +76,7 @@ class Maze:
     #Populate self with maze from FILENAME
     def __init__(self, mazeTextFile):
         self.mazeList=[]
+        self.renderWindow = DRAW_MAZE
         mazeText=open('mazetxt/'+mazeTextFile+'.txt')
         for line in mazeText:
             rowList=[]
@@ -93,7 +94,7 @@ class Maze:
         # Initializes all agent objects
         self.initAgents()
         # Graphics window init
-        if DRAW_MAZE:
+        if self.renderWindow:
             # Setup display window according to maze size
             self.win = GraphWin("Maze Visual "+mazeTextFile, 
                 width=UNIT*self.colsize, 
@@ -184,7 +185,8 @@ class Maze:
         self.cheese.pos = CHEESEPOS
         self.cat.pos = (self.rowsize-1, self.colsize-1)
 
-        if DRAW_MAZE: self.redrawAgents()
+        if self.renderWindow: self.redrawAgents()
+        return self.cat.pos, self.mouse.pos, self.cheese.pos
     ## end restart
 
     # Graphic visualization of maze
@@ -244,7 +246,7 @@ class Maze:
     # The cat catching the mouse and the mouse getting 
     # the cheese in the same turn is possible
     def turnEnd(self):
-        if DRAW_MAZE: self.redrawAgents()
+        if self.renderWindow: self.redrawAgents()
         done = False
         # The cat ate the mouse
         if self.cat.pos == self.mouse.pos:
@@ -254,6 +256,8 @@ class Maze:
         # The mouse ate the cheese
         if self.mouse.pos == self.cheese.pos:
             self.mouse.reward += TARGET
+            #adding penalty for the cat if the cat doesnt catch the mouse
+            self.cat.reward -= TARGET
             done = True
         return self.cat.pos, self.cat.reward, self.mouse.pos, self.mouse.reward, done
     ## end turnEnd
