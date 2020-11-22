@@ -107,7 +107,6 @@ class Maze:
     def initAgents(self):
         mousepos = (0,0)
         catpos = (self.rowsize-1, self.colsize-1)
-
         #Move the block below into a function
         # Random position on board
         # cheesepos = (random.randint(0,self.rowsize-1), 
@@ -115,7 +114,6 @@ class Maze:
         # while (cheesepos == mousepos or cheesepos == catpos):
         #     cheesepos = (random.randint(0,self.rowsize-1), 
         #                 random.randint(0,self.colsize-1))
-        
         cheesepos = CHEESEPOS  #static cheese for testing
 
         mx, my = mousepos
@@ -185,6 +183,9 @@ class Maze:
         self.cheese.pos = CHEESEPOS
         self.cat.pos = (self.rowsize-1, self.colsize-1)
 
+        self.mouse.reward = 0
+        self.cat.reward = 0
+        
         if self.renderWindow: self.redrawAgents()
         return self.cat.pos, self.mouse.pos, self.cheese.pos
     ## end restart
@@ -207,7 +208,6 @@ class Maze:
     # Return: <int> immediate move reward
     def moveAgent(self, agent, direction_num):
         x, y = agent.pos
-        print('x,y', x,y)
         if direction_num == 0: dy, dx = 1, 0        # UP
         elif direction_num == 1: dy, dx = -1, 0     # DOWN
         elif direction_num == 2: dy, dx = 0, -1     # LEFT
@@ -257,7 +257,7 @@ class Maze:
         if self.mouse.pos == self.cheese.pos:
             self.mouse.reward += TARGET
             #adding penalty for the cat if the cat doesnt catch the mouse
-            self.cat.reward -= TARGET
+            self.cat.reward -= TARGET/2
             done = True
         return self.cat.pos, self.cat.reward, self.mouse.pos, self.mouse.reward, done
     ## end turnEnd

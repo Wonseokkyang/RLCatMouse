@@ -46,6 +46,7 @@ def main():
     myMouse = Brain('Mouse', env.mouse.pos, env.actions)
     cheesePos = env.cheese.pos
     board = env.mazeList
+    # env.renderWindow = False
 #lets impliment regular, 1step with both cat and mouse first then apply n-step.
 #1-step with cat
     while True:
@@ -56,8 +57,9 @@ def main():
         # print('Calling mouse.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         mouseAction = myMouse.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
         mouseImmediateReward = env.moveMouse(mouseAction)
-        print('mosueAction:', mouseAction)
         print('immediate reward:', mouseImmediateReward)
+        print('myMouse.q_table:', myMouse.q_table)
+
 
         # print('Calling cat.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         catAction = myCat.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
@@ -68,7 +70,7 @@ def main():
         #get feedback from the environment
         catPos, catReward, mousePos, mouseReward, done = env.turnEnd()
 
-        # Update agent's brains to reflect current board positions
+        # Update agent's brains to reflect board positions after move
         myMouse.updateBrain(catPos, catReward, mousePos, mouseReward)
         myCat.updateBrain(catPos, catReward, mousePos, mouseReward)
 
@@ -76,12 +78,9 @@ def main():
         myMouse.learnLast(mouseImmediateReward)
         myCat.learnLast(catImmediateReward)
 
-        # print('\nmyMouse.q_table after learnLast', myMouse.q_table)
-        # print('\nmyCat.q_table after learnLast', myCat.q_table)
-
         #if something got caught, execute learning of agents
         if done: 
-            time.sleep(1)
+            # time.sleep(1)
             catchCount += 1
             print('Hit something')
             print('mouse q-table before learnAll')
@@ -91,13 +90,16 @@ def main():
             print('=AFTER=')
             # print(myMouse.q_table)
             # print(myCat.q_table)
-            env.restart()
+            myCat.pos, myMouse.pos, cheesePos = env.restart()
         # env.win.getMouse()
         number_of_turns += 1
         # if number_of_turns == 100:
             # break
             
-        if catchCount == 501:
+        if catchCount == 1000:
+            env.renderWindow = True
+            env.win.getMouse()
+        if catchCount == 1100:
             break
 
 

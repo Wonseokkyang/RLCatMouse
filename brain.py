@@ -98,13 +98,15 @@ class Brain:
     # Return: random direction
     def chooseRandom(self, envState, catPos, mousePos, cheesePos):
         # Update agent's memory on where it is on the board now
-        if self.name == 'Mouse': self.pos = mousePos
-        else: self.pos = catPos
+        if self.name == 'Mouse': 
+            self.pos = mousePos
+            hashedBoard = str(mousePos + cheesePos)
+        else: 
+            self.pos = catPos
+            hashedBoard = str(catPos)
         action = self.actions[random.randint(0, len(self.actions)-1)]
         # Tuple of (state, action)
-        self.history.append(
-            (self.hashProx(
-                envState, catPos, mousePos, cheesePos), action))
+        self.history.append((hashedBoard, action))
         return action
     ##end chooseRandom
 
@@ -116,17 +118,17 @@ class Brain:
         #if roll for epsilon: chooseRandom()
         #else: do below
         # Roll to see agent chooses to explore or not
+        print('Choosing an action for', self.name)
         if np.random.uniform() > self.epsilon:
-            action = random.randint(0, lan(self.actions)-1)
+            print('Rolled and random > epsilon. Choosing random direction.')
+            action = self.chooseRandom(envState, catPos, mousePos, cheesePos)
         else:
             hashedProx = self.hashProx(
                 envState, catPos, mousePos, cheesePos)
-            hashedBoard = str(catPos + mousePos + cheesePos)
-
             if self.name == 'Mouse': 
-                action = self.chooseMouse(mousePos, hashedProx, hashedBoard)
+                action = self.chooseMouse(mousePos, hashedProx, str(mousePos + cheesePos))
             else: 
-                action = self.chooseCat(catPos, hashedProx, hashedBoard)
+                action = self.chooseCat(catPos, hashedProx, str(catPos + mousePos))
         return action
         #function to check if cat/cheese is in range
         # if they are, use snapshot
@@ -137,8 +139,10 @@ class Brain:
         # Update agent's memory on where it is on the board now
         self.pos = catPos
         if 'm' in hashedProx:   #mouse is within cat's vision
+            print('Mouse is within viewRange. Choosing from snapshot table.')
             return self.chooseSnapshot(hashedProx)
         else:   #use regular q_table
+            print('No mouse in range.')
             return self.chooseEnv(hashedBoard)
     ## end chooseMouse
 
@@ -146,8 +150,10 @@ class Brain:
         # Update agent's memory on where it is on the board now
         self.pos = mousePos
         if 'C' in hashedProx:   #cat is within mouse's vision
+            print('Cat is within viewRange. Choosing from snapshot table.')
             return self.chooseSnapshot(hashedProx)
         else:   #use regular q_table
+            print('No cat in range.')
             return self.chooseEnv(hashedBoard)
     ## end chooseMouse
 
@@ -155,9 +161,10 @@ class Brain:
     def chooseEnv(self, hashedBoard):
         values = self.q_table.get(hashedBoard)
         if values == None:
-            print('choosing random action from chooseEnv')
-            return random.randint(0, len(self.actions)-1)
+            print('Choosing random action from chooseEnv b/c values==None')
+            action = random.randint(0, len(self.actions)-1)
         else:
+            print('Choosing from action pool:', hashedBoard, ':', values)
             maxPool = []
             maxVal = -999
             for indx, val in enumerate(values):
@@ -169,8 +176,9 @@ class Brain:
                     maxPool.append(indx)
             #choose random from pool of indexes
             action = maxPool[random.randint(0, len(maxPool)-1)]
-            self.history.append((hashedBoard, action))
-            return action
+            print('Decided on action:', action)
+        self.history.append((hashedBoard, action))
+        return action
     ## end chooseEnv
 
     # Pick direction that will get you into a state with the
@@ -234,36 +242,34 @@ class Brain:
         values = table.get(lastState, [0] * len(self.actions))
         table.update({lastState : values})
 
-        print('lastState-', lastState)
-        print('specific value before update-', table[lastState][lastAction])
-
         # Update state:action for that one action
         # learning rate * (discount factor * reward - current value at that action)
         table[lastState][lastAction] += self.alpha * (
             self.gamma * reward - table[lastState][lastAction])
 
-        print('for step reward:', step, reward)
-        print('specific value after update-', table[lastState][lastAction])
         return reward * self.gamma
     ## end learnStep
 
     # Calculate and update for all steps taken in self.history
     def learnAll(self, reward):
-        newReward = reward
-        for _ in range(len(self.history)):
-            newReward = self.learnStep(self.history.pop(), newReward, self.q_table)
-        print('History after learnAll finishs:', self.history)
+        print('learnAll() called for', self.name)
+        # newReward = reward
+        # for _ in range(len(self.history)):
+        #     newReward = self.learnStep(self.history.pop(), newReward, self.q_table)
+        # print('History after learnAll finishs:', self.history)
+        self.history.clear()
         
         newReward = reward
         for _ in range(len(self.proxHistory)):
             newReward = self.learnStep(self.proxHistory.pop(), newReward, self.proxTable)
-        print('proxHistory after learnAll finishs:', self.proxHistory)
+        # print('proxHistory after learnAll finishs:', self.proxHistory)
     ## end learnAll
 
     # Wrapper to call learnStep from outside class
     def learnLast(self, reward):
+        print('Name:', self.name, 'history:', self.history)
         self.learnStep(self.history[len(self.history)-1], reward, self.q_table)
-        self.learnStep(self.proxHistory[len(self.proxHistory)-1], reward, self.proxTable)
+        # self.learnStep(self.proxHistory[len(self.proxHistory)-1], reward, self.proxTable)
     ## end learnLast
 
     # Update self info with given info from board/main program
@@ -280,6 +286,7 @@ class Brain:
         print(' name:', self.name)
         print(' position:', self.pos)
         print(' history:', self.history)
+        print(' proxHistory:', self.proxHistory)
     ## end printInfo
 
         # def choose_action(self, state):
