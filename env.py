@@ -257,7 +257,7 @@ class Maze:
         if self.mouse.pos == self.cheese.pos:
             self.mouse.reward += TARGET
             #adding penalty for the cat if the cat doesnt catch the mouse
-            self.cat.reward -= TARGET/2
+            # self.cat.reward -= TARGET/2
             done = True
         return self.cat.pos, self.cat.reward, self.mouse.pos, self.mouse.reward, done
     ## end turnEnd

@@ -24,19 +24,22 @@
 ########################################################################
 ##                          Notes                                     ##
 ########################################################################
-#
+#   TODO:
+#   maybe the problem is the agent only updating the snapshot upon W/L
+#   have the agent regressively reward history along with proxHistory
+#   The agents movement towards the reward will be positive. As for
+#   the penalty
 ########################################################################
 """
 import time
 from env import Maze
 from brain import Brain
 from consts import FILE_NAME    #file to pull/generate env from
-from consts import DRAW_MAZE    #flag to show graphic window
+# from consts import DRAW_MAZE    #flag to show graphic window
 from consts import ALPHA as alpha, GAMMA as gamma, EPSILON as epsilon
 from consts import SPEED
 
 def main():
-    DRAW_MAZE = False
     number_of_turns = 0
     catchCount = 0
     env = Maze(FILE_NAME)
@@ -46,37 +49,54 @@ def main():
     myMouse = Brain('Mouse', env.mouse.pos, env.actions)
     cheesePos = env.cheese.pos
     board = env.mazeList
-    # env.renderWindow = False
+    env.renderWindow = True
 #lets impliment regular, 1step with both cat and mouse first then apply n-step.
 #1-step with cat
     while True:
+        print('\nCLICK to start loop.')
+        env.win.getMouse()
         print('==At start of loop, cat and mouse information:==')
         myCat.printInfo()
         myMouse.printInfo()
 
+        print('\nCLICK to let mouse choose action.')
+        env.win.getMouse()
         # print('Calling mouse.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         mouseAction = myMouse.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
         mouseImmediateReward = env.moveMouse(mouseAction)
         print('immediate reward:', mouseImmediateReward)
         print('myMouse.q_table:', myMouse.q_table)
 
-
+        print('\nCLICK to let cat choose action.')
+        env.win.getMouse()
         # print('Calling cat.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         catAction = myCat.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
         catImmediateReward = env.moveCat(catAction)
         print('catAction:', catAction)
         print('immediate reward:', catImmediateReward)
 
+        print('\nCLICK to get feedback from environment.')
+        env.win.getMouse()
         #get feedback from the environment
         catPos, catReward, mousePos, mouseReward, done = env.turnEnd()
+        print('catPos:', catPos, 'catImmediateReward:', catImmediateReward, 'mousePos:', mousePos, 'mouseImmediateReward:', mouseImmediateReward, 'done:', done)
 
+        print('\nCLICK to update agent Brain with positions.')
+        env.win.getMouse()
         # Update agent's brains to reflect board positions after move
         myMouse.updateBrain(catPos, catReward, mousePos, mouseReward)
         myCat.updateBrain(catPos, catReward, mousePos, mouseReward)
 
+        myCat.printInfo()
+        myMouse.printInfo()
+        print('\nCLICK to start learnLast step for both agents.')
+        env.win.getMouse()
         #immediate learning of step taken
         myMouse.learnLast(mouseImmediateReward)
         myCat.learnLast(catImmediateReward)
+        myCat.printInfo()
+        myMouse.printInfo()
+        print('\nCLICK to continue.')
 
         #if something got caught, execute learning of agents
         if done: 
@@ -96,10 +116,9 @@ def main():
         # if number_of_turns == 100:
             # break
             
-        if catchCount == 1000:
+        if catchCount == 100:
             env.renderWindow = True
-            env.win.getMouse()
-        if catchCount == 1100:
+        if catchCount == 200:
             break
 
 

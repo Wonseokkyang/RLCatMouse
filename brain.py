@@ -76,6 +76,7 @@ import random
 import pandas as pd
 import numpy as np
 from consts import VIEW_DISTANCE, ALPHA, GAMMA, EPSILON
+from consts import OUT_OF_FRAME
 
 #const view_distance 
 
@@ -242,10 +243,16 @@ class Brain:
         values = table.get(lastState, [0] * len(self.actions))
         table.update({lastState : values})
 
+        print('Changing q-table for state:action', lastState, ':', lastAction)
+        print('Q-table values before change.', lastState, ':', values)
+
+
         # Update state:action for that one action
         # learning rate * (discount factor * reward - current value at that action)
         table[lastState][lastAction] += self.alpha * (
             self.gamma * reward - table[lastState][lastAction])
+
+        print('Q-table values after change.', lastState, ':', values)
 
         return reward * self.gamma
     ## end learnStep
@@ -268,7 +275,13 @@ class Brain:
     # Wrapper to call learnStep from outside class
     def learnLast(self, reward):
         print('Name:', self.name, 'history:', self.history)
-        self.learnStep(self.history[len(self.history)-1], reward, self.q_table)
+
+        if reward == OUT_OF_FRAME:
+            self.learnStep(self.history.pop(), reward, self.q_table)
+
+        else:
+            self.learnStep(self.history[len(self.history)-1], reward, self.q_table)
+
         # self.learnStep(self.proxHistory[len(self.proxHistory)-1], reward, self.proxTable)
     ## end learnLast
 

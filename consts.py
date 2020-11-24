@@ -21,8 +21,8 @@
 
 # Name of txt file to create the learning environment
 # Located in ./mazetxt
-FILE_NAME = 'blank5x5wall'
-# FILE_NAME = 'blank10x10wall'
+# FILE_NAME = 'blank5x5wall'
+FILE_NAME = 'blank10x10wall'
 
 # Draw the graphical window to show the agent(s) in action.
 DRAW_MAZE = True
@@ -40,17 +40,17 @@ CYCLES = 1
 # Reward values:
 OUT_OF_FRAME = -100.0   #out of bounds penalty
 WALL = -10.0            #hitting a wall penalty
-MOVE = -0.1             #moving into a square penalty
+MOVE = -1             #moving into a square penalty
 TARGET = 20.0          #finding the end of the maze reward
 CAUGHT = TARGET         #reward for mouse reaching cheese and/or cat reaching mouse
 
 # Math values
 ALPHA = 0.9             #how heavily the learning algorithm gets changed toward a positive reward (learning rate)
 GAMMA = 0.9             #the discount factor of future rewards (0 nearsighted vs 1 farsighted)
-EPSILON = 0.9           #the weight of the algo's 'greediness', less greedy = explore, more greedy = exploit
+EPSILON = 0.75          #the weight of the algo's 'greediness', less greedy = explore, more greedy = exploit
 
 # Agent Values
-VIEW_DISTANCE = 2
+VIEW_DISTANCE = 3
 # LOOK_AHEAD_DEPTH = 2    #0 for greedy algo only, else LOOK_AHEAD_DEPTH = 'n'
 # CHEESEPOS = (5,5)
-CHEESEPOS = (2,2)
+CHEESEPOS = (6,6)
