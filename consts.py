@@ -45,8 +45,8 @@ TARGET = 20.0          #finding the end of the maze reward
 CAUGHT = TARGET         #reward for mouse reaching cheese and/or cat reaching mouse
 
 # Math values
-ALPHA = 0.9             #how heavily the learning algorithm gets changed toward a positive reward (learning rate)
-GAMMA = 0.9             #the discount factor of future rewards (0 nearsighted vs 1 farsighted)
+ALPHA = 0.9             #how heavily the learning algorithm gets changed toward a reward (learning rate)
+GAMMA = 0.5             #the discount factor of future rewards (0 nearsighted vs 1 farsighted)
 EPSILON = 0.75          #the weight of the algo's 'greediness', less greedy = explore, more greedy = exploit
 
 # Agent Values
