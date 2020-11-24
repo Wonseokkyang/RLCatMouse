@@ -66,10 +66,10 @@
 
 #   TODO:
 #   hashProx() needs a function to check of vision
-#   chooeseAction() needs epsilon function for explore vs exploite
+#   X chooeseAction() needs epsilon function for explore vs exploite
 #   chooseEnv and chooseSnapshot are similar and can be combined/condensed
 #   into single function with an upper wrapper function.
-#   Change q-table so the agents dont know of each other
+#   X Change q-table so the agents dont know of each other
 ########################################################################
 """
 import random
@@ -115,9 +115,6 @@ class Brain:
     # If the prey/predator is within range, choose from snapshot
     # Return: Action with highest q-value
     def chooseAction(self, envState, catPos, mousePos, cheesePos):
-        ##$$ ADD EPSILON FUNCTION HERE
-        #if roll for epsilon: chooseRandom()
-        #else: do below
         # Roll to see agent chooses to explore or not
         print('Choosing an action for', self.name)
         if np.random.uniform() > self.epsilon:
