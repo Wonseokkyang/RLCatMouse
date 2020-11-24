@@ -49,10 +49,10 @@ def main():
     myMouse = Brain('Mouse', env.mouse.pos, env.actions)
     cheesePos = env.cheese.pos
     board = env.mazeList
-    env.renderWindow = True
+    env.renderWindow = False
 
     ## DEBUGING Step by step
-    debug = True
+    debug = False
 #lets impliment regular, 1step with both cat and mouse first then apply n-step.
 #1-step with cat
     while True:
@@ -127,7 +127,7 @@ def main():
         # if number_of_turns == 100:
             # break
             
-        if catchCount == 100:
+        if catchCount == 25:
             env.renderWindow = True
         if catchCount == 200:
             break
