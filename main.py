@@ -50,10 +50,11 @@ def main():
     myMouse = Brain('Mouse', env.mouse.pos, env.actions)
     cheesePos = env.cheese.pos
     board = env.mazeList
-    env.renderWindow = True
 
-    ## DEBUGING Step by step
-    debug = True
+    ## DEBUGING 
+    debug = False   #Step by step toggle
+    env.renderWindow = False    #start with graphics being rendered
+
 #lets impliment regular, 1step with both cat and mouse first then apply n-step.
 #1-step with cat
     while True:
@@ -89,10 +90,12 @@ def main():
             env.win.getMouse()
         #get feedback from the environment
         catPos, catReward, mousePos, mouseReward, done = env.turnEnd()
+
         #add goal rewards if any
         catImmediateReward += catReward
         mouseImmediateReward += mouseReward
         print('catPos:', catPos, 'catImmediateReward:', catImmediateReward, 'mousePos:', mousePos, 'mouseImmediateReward:', mouseImmediateReward, 'done:', done)
+        print('catReward:', catReward, 'mouseReward:', mouseReward)
 
         if debug:
             print('\nCLICK to update agent Brain with positions.')
@@ -107,7 +110,7 @@ def main():
         if debug:
             print('\nCLICK to start learnLast step for both agents.')
             env.win.getMouse()
-        #immediate learning of step taken
+        #immediate learning of step taken 
         myMouse.learnLast(mouseImmediateReward)
         myCat.learnLast(catImmediateReward)
         myCat.printInfo()
@@ -122,8 +125,10 @@ def main():
             print('Hit something')
             print('mouse q-table before learnAll')
             print(myMouse.q_table)
+            print('mouse history before learnAll')
+            print(myMouse.history)
             myMouse.learnAll(mouseReward)
-            myCat.learnAll(catReward)
+            myCat.learnAll(catReward) 
             print('=AFTER=')
             # print(myMouse.q_table)
             # print(myCat.q_table)
