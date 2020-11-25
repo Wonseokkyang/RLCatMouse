@@ -41,11 +41,9 @@ from consts import SPEED
 import csv
 
 def main():
-    number_of_turns = 0
-    catchCount = 0
+    number_of_turns = 0 #going to use this for counting the number of steps before game end
+    catchCount = 0  #count of game ends
     env = Maze(FILE_NAME)
-    # myCat = Brain(env.actions, alpha, gamma, epsilon)
-# def __init__(self, name, pos, actions, given_alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON):
     myCat = Brain('Cat', env.cat.pos, env.actions)
     myMouse = Brain('Mouse', env.mouse.pos, env.actions)
     cheesePos = env.cheese.pos
@@ -55,8 +53,6 @@ def main():
     debug = False   #Step by step toggle
     env.renderWindow = False    #start with graphics being rendered
 
-#lets impliment regular, 1step with both cat and mouse first then apply n-step.
-#1-step with cat
     while True:
         if debug:
             print('\nCLICK to start loop.')
@@ -143,31 +139,153 @@ def main():
         if (catchCount % 100 == 0) :
             saveAgent(myCat, catchCount)
             saveAgent(myMouse, catchCount)
-        if catchCount == 500000:
+        if catchCount == 1:
             break
 
 # A function to save agent's memory for future testing
 def saveAgent(player, catchCount):
+    fieldnames = ['state', 0,1,2,3]
     wfile = csv.DictWriter(open(str(catchCount)+str(player.name)+'memory.csv', 
-            'w', newline=''), fieldnames=['state', 'action'])
+            'w', newline=''), fieldnames=fieldnames)
     wfile.writeheader()
     for key,val in player.q_table.items():
-        # print('{key:value}', {key:val})
-        wfile.writerow({'state' : key,  'action' : val})
-
-    # wfile2 = csv.DictWriter(open(str(catchCount)+str(player.name)+'snapshot.csv', 
-    #         'w', newline=''), fieldnames=['state', 'action'])
-    # wfile2.writeheader()
-    # for key,val in player.proxTable.items():
-    #     # print('{key:value}', {key:val})
-    #     wfile2.writerow({'state' : key,  'action' : val})
+        row = {}
+        row['state'] = key
+        row[0] = val[0]
+        row[1] = val[1]
+        row[2] = val[2]
+        row[3] = val[3]
+        wfile.writerow(row)
 
 # Function to load a saved agent's memory for testing
-def loadAgent(player):
-    rfile = csv.DictReader(open('player'+str(player.name)+'memory.csv', 'r'))
+def loadAgent(player, itNum):
+    rfile = csv.DictReader(open(str(itNum)+str(player.name)+'memory.csv', 'r'))
     for row in rfile:  
-        player.q_table[row['state']] = row['action']
+        player.q_table[row['state']] = [float(row['0']), float(row['1']), float(row['2']), float(row['3'])] 
 
+def testLoading(itNumber):
+    print('INIT base game..')
+    time.sleep(1)
+    catchCount = itNumber
+    env = Maze(FILE_NAME)
+    myCat = Brain('Cat', env.cat.pos, env.actions)
+    myMouse = Brain('Mouse', env.mouse.pos, env.actions)
+    cheesePos = env.cheese.pos
+    board = env.mazeList
 
-main()
-print('after main')
+    print('loading from file')
+    loadAgent(myCat, catchCount)
+    loadAgent(myMouse, catchCount)
+    time.sleep(1)
+
+    print('showing agent info/q_tables')
+    myCat.printInfo()
+    myMouse.printInfo()
+    time.sleep(1)
+
+    print('testing running of agents from this point..')
+    time.sleep(1)
+
+    
+    ## DEBUGING 
+    debug = True   #Step by step toggle
+    env.renderWindow = True    #start with graphics being rendered
+
+    while True:
+        if debug:
+            print('\nCLICK to start loop.')
+            env.win.getMouse()
+        print('==At start of loop, cat and mouse information:==')
+        myCat.printInfo()
+        myMouse.printInfo()
+
+        if debug:
+            print('\nCLICK to let mouse choose action.')
+            env.win.getMouse()
+        # print('Calling mouse.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
+        mouseAction = myMouse.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
+        mouseImmediateReward = env.moveMouse(mouseAction)
+        
+        if debug:
+            print('immediate reward:', mouseImmediateReward)
+            print('myMouse.q_table:', myMouse.q_table)
+            print('\nCLICK to let cat choose action.')
+            env.win.getMouse()
+        # print('Calling cat.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
+        catAction = myCat.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
+        catImmediateReward = env.moveCat(catAction)
+        
+
+        if debug:
+            print('catAction:', catAction)
+            print('immediate reward:', catImmediateReward)
+            print('myCat.q_table:', myCat.q_table)
+            print('\nCLICK to get feedback from environment.')
+            env.win.getMouse()
+        #get feedback from the environment
+        catPos, catReward, mousePos, mouseReward, done = env.turnEnd()
+
+        #add goal rewards if any
+        catImmediateReward += catReward
+        mouseImmediateReward += mouseReward
+        
+        if debug:
+            print('catPos:', catPos, 'catImmediateReward:', catImmediateReward, 'mousePos:', mousePos, 'mouseImmediateReward:', mouseImmediateReward, 'done:', done)
+            print('catReward:', catReward, 'mouseReward:', mouseReward)
+            print('\nCLICK to update agent Brain with positions.')
+            env.win.getMouse()
+        # Update agent's brains to reflect board positions after move
+        myMouse.updateBrain(catPos, catReward, mousePos, mouseReward)
+        myCat.updateBrain(catPos, catReward, mousePos, mouseReward)
+
+        myCat.printInfo()
+        myMouse.printInfo()
+
+        if debug:
+            print('\nCLICK to start learnLast step for both agents.')
+            env.win.getMouse()
+        #immediate learning of step taken 
+        myMouse.learnLast(mouseImmediateReward)
+        myCat.learnLast(catImmediateReward)
+        myCat.printInfo()
+        myMouse.printInfo()
+        if debug:
+            print('\nCLICK to continue.')
+
+        #if something got caught, execute learning of agents
+        if done: 
+            catchCount += 1
+            print('Hit something')
+            if debug:
+                print('mouse q-table before learnAll')
+                print(myMouse.q_table)
+                print('mouse history before learnAll')
+                print(myMouse.history)
+            myMouse.learnAll(mouseReward)
+            myCat.learnAll(catReward) 
+            myCat.pos, myMouse.pos, cheesePos = env.restart()   #using restart() so I can program in random spot spawning
+
+        if catchCount == 500000:
+            break
+    ## end testLoading()
+
+def testW(player, catchCount):
+    fieldnames = ['state', 0,1,2,3]
+    wfile = csv.DictWriter(open(str(catchCount)+str(player.name)+'memory.csv', 
+            'w', newline=''), fieldnames=fieldnames)
+    wfile.writeheader()
+    for key,val in player.q_table.items():
+        row = {}
+        row['state'] = key
+        row[0] = val[0]
+        row[1] = val[1]
+        row[2] = val[2]
+        row[3] = val[3]
+        wfile.writerow(row)
+
+### BODY ###
+# main()
+# print('after main')
+
+testLoading(0)
+print('after testLoading()')
