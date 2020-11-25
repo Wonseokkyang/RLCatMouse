@@ -43,7 +43,8 @@
 #   TO DO:
 #   Cheese spawning on walls
 #   make a cfg.py file instead of consts.py
-#   
+#   See if I can show iteration number dynamically increasing in window
+#   title
 ########################################################################
 """
 from graphics import *  

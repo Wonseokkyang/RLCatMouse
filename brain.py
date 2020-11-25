@@ -89,7 +89,6 @@ class Brain:
         self.epsilon = epsilon
         self.q_table = {}   #board: (cat, mouse, cheese) -> mouse:(mouse, cheese) cat:(cat)
         self.proxTable = {} #key : snapshot of n area around agent. value : cardinal directions
-        self.proxHistory = []
         self.history = []
         self.name = name    #mainly for troubleshooting
         self.pos = pos
@@ -179,14 +178,18 @@ class Brain:
         return action
     ## end chooseEnv
 
-    # Pick direction that will get you into a state with the
-    # highest q-value and return it.
-    # Return: Action to transition to highest q-value state
+    # Pick direction that will get you into a proxTable state with 
+    # the highest q-value and return it. Append that hashed state and 
+    # action to self.proxHistory.
+    # Return: Action from hashed:action w/ highest q-value
     def chooseSnapshot(self, hashed):
         #Get action choices. If choices are empty, choose random
         actionChoices = self.proxTable.get(hashed)
+        print('For snapshot:actions,', hashed, ':', actionChoices)
+
         if actionChoices == None: 
-            return random.randint(0, len(self.actions)-1)
+            print('Choosing random because actionChoices == None.')
+            action = random.randint(0, len(self.actions)-1)
         else:
             maxPool = []
             maxVal = -999
@@ -198,8 +201,11 @@ class Brain:
                     maxVal = val
                     maxPool.append(indx)
             action = maxPool[random.randint(0, len(maxPool)-1)]
-            self.proxHistory.append((hashed, action))
-            return action
+        print('Chose action:', action)
+        self.proxHistory.append((hashed, action))
+        print('\nproxHistory should have been appended with:', hashed, action)
+        print('checking prox history:', self.proxHistory, '\n')
+        return action
     # end chooseSnapshot
 
     # Given curr board, return snapshot of the proximity around the agent
@@ -254,14 +260,14 @@ class Brain:
         return reward * self.gamma
     ## end learnStep
 
-    # Calculate and update for all steps taken in self.history
+    # Calculate and update for all steps taken in self.history and proxHistory
     def learnAll(self, reward):
         print('learnAll() called for', self.name)
-        # newReward = reward
-        # for _ in range(len(self.history)):
-        #     newReward = self.learnStep(self.history.pop(), newReward, self.q_table)
-        # print('History after learnAll finishs:', self.history)
-        self.history.clear()
+        newReward = reward
+        for _ in range(len(self.history)):
+            newReward = self.learnStep(self.history.pop(), newReward, self.q_table)
+        print('History after learnAll finishs:', self.history)
+        # self.history.clear()
         
         newReward = reward
         for _ in range(len(self.proxHistory)):
@@ -275,10 +281,8 @@ class Brain:
 
         if reward == OUT_OF_FRAME:
             self.learnStep(self.history.pop(), reward, self.q_table)
-
         else:
             self.learnStep(self.history[len(self.history)-1], reward, self.q_table)
-
         # self.learnStep(self.proxHistory[len(self.proxHistory)-1], reward, self.proxTable)
     ## end learnLast
 

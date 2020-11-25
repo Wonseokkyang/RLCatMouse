@@ -21,8 +21,8 @@
 
 # Name of txt file to create the learning environment
 # Located in ./mazetxt
-# FILE_NAME = 'blank5x5wall'
-FILE_NAME = 'blank10x10wall'
+FILE_NAME = 'blank5x5wall'
+# FILE_NAME = 'blank10x10wall'
 
 # Draw the graphical window to show the agent(s) in action.
 DRAW_MAZE = True
@@ -53,4 +53,4 @@ EPSILON = 0.75          #the weight of the algo's 'greediness', less greedy = ex
 VIEW_DISTANCE = 3
 # LOOK_AHEAD_DEPTH = 2    #0 for greedy algo only, else LOOK_AHEAD_DEPTH = 'n'
 # CHEESEPOS = (5,5)
-CHEESEPOS = (6,6)
+CHEESEPOS = (2,2)

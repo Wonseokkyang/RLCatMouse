@@ -38,6 +38,7 @@ from consts import FILE_NAME    #file to pull/generate env from
 # from consts import DRAW_MAZE    #flag to show graphic window
 from consts import ALPHA as alpha, GAMMA as gamma, EPSILON as epsilon
 from consts import SPEED
+import csv
 
 def main():
     number_of_turns = 0
@@ -49,10 +50,10 @@ def main():
     myMouse = Brain('Mouse', env.mouse.pos, env.actions)
     cheesePos = env.cheese.pos
     board = env.mazeList
-    env.renderWindow = False
+    env.renderWindow = True
 
     ## DEBUGING Step by step
-    debug = False
+    debug = True
 #lets impliment regular, 1step with both cat and mouse first then apply n-step.
 #1-step with cat
     while True:
@@ -71,6 +72,8 @@ def main():
         mouseImmediateReward = env.moveMouse(mouseAction)
         print('immediate reward:', mouseImmediateReward)
         print('myMouse.q_table:', myMouse.q_table)
+        print('myMouse.proxTable:', myMouse.proxTable)
+
 
         if debug:
             print('\nCLICK to let cat choose action.')
@@ -80,6 +83,8 @@ def main():
         catImmediateReward = env.moveCat(catAction)
         print('catAction:', catAction)
         print('immediate reward:', catImmediateReward)
+        print('myCat.q_table:', myCat.q_table)
+        print('myCat.proxTable:', myCat.proxTable)
 
         if debug:
             print('\nCLICK to get feedback from environment.')
@@ -127,12 +132,37 @@ def main():
         # if number_of_turns == 100:
             # break
             
-        if catchCount == 25:
+        if catchCount == 5000:
             env.renderWindow = True
-        if catchCount == 200:
+        if catchCount == 5001:
+            env.renderWindow = False
+        if (catchCount % 100 == 0) :
+            saveAgent(myCat, catchCount)
+            saveAgent(myMouse, catchCount)
+        if catchCount == 500000:
             break
 
+# A function to save agent's memory for future testing
+def saveAgent(player, catchCount):
+    wfile = csv.DictWriter(open(str(catchCount)+str(player.name)+'memory.csv', 
+            'w', newline=''), fieldnames=['state', 'action'])
+    wfile.writeheader()
+    for key,val in player.q_table.items():
+        # print('{key:value}', {key:val})
+        wfile.writerow({'state' : key,  'action' : val})
 
+    wfile2 = csv.DictWriter(open(str(catchCount)+str(player.name)+'snapshot.csv', 
+            'w', newline=''), fieldnames=['state', 'action'])
+    wfile2.writeheader()
+    for key,val in player.proxTable.items():
+        # print('{key:value}', {key:val})
+        wfile2.writerow({'state' : key,  'action' : val})
+
+# Function to load a saved agent's memory for testing
+def loadAgent(player):
+    rfile = csv.DictReader(open('player'+str(player.name)+'memory.csv', 'r'))
+    for row in rfile:  
+        player.q_table[row['state']] = row['action']
 
 
 main()
