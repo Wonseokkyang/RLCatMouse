@@ -71,21 +71,21 @@ def main():
         # print('Calling mouse.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         mouseAction = myMouse.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
         mouseImmediateReward = env.moveMouse(mouseAction)
-        print('immediate reward:', mouseImmediateReward)
-        print('myMouse.q_table:', myMouse.q_table)
-
-
+        
         if debug:
+            print('immediate reward:', mouseImmediateReward)
+            print('myMouse.q_table:', myMouse.q_table)
             print('\nCLICK to let cat choose action.')
             env.win.getMouse()
         # print('Calling cat.chooseRandom with catpos mousepos cheese pos:', myCat.pos, myMouse.pos, cheesePos)
         catAction = myCat.chooseAction(board, myCat.pos, myMouse.pos, cheesePos)
         catImmediateReward = env.moveCat(catAction)
-        print('catAction:', catAction)
-        print('immediate reward:', catImmediateReward)
-        print('myCat.q_table:', myCat.q_table)
+        
 
         if debug:
+            print('catAction:', catAction)
+            print('immediate reward:', catImmediateReward)
+            print('myCat.q_table:', myCat.q_table)
             print('\nCLICK to get feedback from environment.')
             env.win.getMouse()
         #get feedback from the environment
@@ -94,10 +94,10 @@ def main():
         #add goal rewards if any
         catImmediateReward += catReward
         mouseImmediateReward += mouseReward
-        print('catPos:', catPos, 'catImmediateReward:', catImmediateReward, 'mousePos:', mousePos, 'mouseImmediateReward:', mouseImmediateReward, 'done:', done)
-        print('catReward:', catReward, 'mouseReward:', mouseReward)
-
+        
         if debug:
+            print('catPos:', catPos, 'catImmediateReward:', catImmediateReward, 'mousePos:', mousePos, 'mouseImmediateReward:', mouseImmediateReward, 'done:', done)
+            print('catReward:', catReward, 'mouseReward:', mouseReward)
             print('\nCLICK to update agent Brain with positions.')
             env.win.getMouse()
         # Update agent's brains to reflect board positions after move
@@ -123,24 +123,22 @@ def main():
             # time.sleep(1)
             catchCount += 1
             print('Hit something')
-            print('mouse q-table before learnAll')
-            print(myMouse.q_table)
-            print('mouse history before learnAll')
-            print(myMouse.history)
+            if debug:
+                print('mouse q-table before learnAll')
+                print(myMouse.q_table)
+                print('mouse history before learnAll')
+                print(myMouse.history)
             myMouse.learnAll(mouseReward)
             myCat.learnAll(catReward) 
-            print('=AFTER=')
-            # print(myMouse.q_table)
-            # print(myCat.q_table)
             myCat.pos, myMouse.pos, cheesePos = env.restart()   #using restart() so I can program in random spot spawning
         # env.win.getMouse()
         number_of_turns += 1
         # if number_of_turns == 100:
             # break
             
-        if catchCount == 5000:
+        if catchCount % 1000 == 0:
             env.renderWindow = True
-        if catchCount == 5001:
+        if catchCount % 1001 == 2:
             env.renderWindow = False
         if (catchCount % 100 == 0) :
             saveAgent(myCat, catchCount)
