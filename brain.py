@@ -70,6 +70,9 @@
 #   chooseEnv and chooseSnapshot are similar and can be combined/condensed
 #   into single function with an upper wrapper function.
 #   X Change q-table so the agents dont know of each other
+#   See a problem with calculating history and prox history. lets get rid
+#   of prox history and have it all saved under history for processing at
+#   the end.
 ########################################################################
 """
 import random
@@ -88,7 +91,6 @@ class Brain:
         self.gamma = gamma
         self.epsilon = epsilon
         self.q_table = {}   #board: (cat, mouse, cheese) -> mouse:(mouse, cheese) cat:(cat)
-        self.proxTable = {} #key : snapshot of n area around agent. value : cardinal directions
         self.history = []
         self.name = name    #mainly for troubleshooting
         self.pos = pos
@@ -111,7 +113,7 @@ class Brain:
     ##end chooseRandom
 
     # Given envState and agent objects, choose best action
-    # If the prey/predator is within range, choose from snapshot
+    # If the prey/predator is within range, choose using snapshot key
     # Return: Action with highest q-value
     def chooseAction(self, envState, catPos, mousePos, cheesePos):
         # Roll to see agent chooses to explore or not
@@ -120,6 +122,8 @@ class Brain:
             print('Rolled and random > epsilon. Choosing random direction.')
             action = self.chooseRandom(envState, catPos, mousePos, cheesePos)
         else:
+            #hashedProx is the string representation of the viewD*viewD squares 
+            #around the agent
             hashedProx = self.hashProx(
                 envState, catPos, mousePos, cheesePos)
             if self.name == 'Mouse': 
@@ -137,55 +141,31 @@ class Brain:
         self.pos = catPos
         if 'm' in hashedProx:   #mouse is within cat's vision
             print('Mouse is within viewRange. Choosing from snapshot table.')
-            return self.chooseSnapshot(hashedProx)
+            return self.choose(hashedProx)
         else:   #use regular q_table
             print('No mouse in range.')
-            return self.chooseEnv(hashedBoard)
-    ## end chooseMouse
+            return self.choose(hashedBoard)
+    ## end chooseCat
 
     def chooseMouse(self, mousePos, hashedProx, hashedBoard):
         # Update agent's memory on where it is on the board now
         self.pos = mousePos
         if 'C' in hashedProx:   #cat is within mouse's vision
             print('Cat is within viewRange. Choosing from snapshot table.')
-            return self.chooseSnapshot(hashedProx)
+            return self.choose(hashedProx)
         else:   #use regular q_table
             print('No cat in range.')
-            return self.chooseEnv(hashedBoard)
+            return self.choose(hashedBoard)
     ## end chooseMouse
 
-    # Choose a move based on q_table
-    def chooseEnv(self, hashedBoard):
-        values = self.q_table.get(hashedBoard)
-        if values == None:
-            print('Choosing random action from chooseEnv b/c values==None')
-            action = random.randint(0, len(self.actions)-1)
-        else:
-            print('Choosing from action pool:', hashedBoard, ':', values)
-            maxPool = []
-            maxVal = -999
-            for indx, val in enumerate(values):
-                if val == maxVal:
-                    maxPool.append(indx)
-                if val > maxVal:
-                    maxPool.clear()
-                    maxVal = val
-                    maxPool.append(indx)
-            #choose random from pool of indexes
-            action = maxPool[random.randint(0, len(maxPool)-1)]
-            print('Decided on action:', action)
-        self.history.append((hashedBoard, action))
-        return action
-    ## end chooseEnv
-
-    # Pick direction that will get you into a proxTable state with 
-    # the highest q-value and return it. Append that hashed state and 
-    # action to self.proxHistory.
-    # Return: Action from hashed:action w/ highest q-value
-    def chooseSnapshot(self, hashed):
+    # Pick direction that will get you into a key/state with 
+    # the highest q-value and return it. Append that key/state and 
+    # action to self.history.
+    # Return: Action from key/state:action w/ highest q-value
+    def choose(self, key):
         #Get action choices. If choices are empty, choose random
-        actionChoices = self.proxTable.get(hashed)
-        print('For snapshot:actions,', hashed, ':', actionChoices)
+        actionChoices = self.q_table.get(key)
+        print('For key:actions,', key, ':', actionChoices)
 
         if actionChoices == None: 
             print('Choosing random because actionChoices == None.')
@@ -202,9 +182,9 @@ class Brain:
                     maxPool.append(indx)
             action = maxPool[random.randint(0, len(maxPool)-1)]
         print('Chose action:', action)
-        self.proxHistory.append((hashed, action))
-        print('\nproxHistory should have been appended with:', hashed, action)
-        print('checking prox history:', self.proxHistory, '\n')
+        self.history.append((key, action))
+        print('\History should have been appended with:', key, action)
+        print('checking history:', self.history, '\n')
         return action
     # end chooseSnapshot
 
@@ -260,7 +240,7 @@ class Brain:
         return reward * self.gamma
     ## end learnStep
 
-    # Calculate and update for all steps taken in self.history and proxHistory
+    # Calculate and update for all steps taken in self.history 
     def learnAll(self, reward):
         print('learnAll() called for', self.name)
         newReward = reward
@@ -268,11 +248,6 @@ class Brain:
             newReward = self.learnStep(self.history.pop(), newReward, self.q_table)
         print('History after learnAll finishs:', self.history)
         # self.history.clear()
-        
-        newReward = reward
-        for _ in range(len(self.proxHistory)):
-            newReward = self.learnStep(self.proxHistory.pop(), newReward, self.proxTable)
-        # print('proxHistory after learnAll finishs:', self.proxHistory)
     ## end learnAll
 
     # Wrapper to call learnStep from outside class
@@ -282,8 +257,7 @@ class Brain:
         if reward == OUT_OF_FRAME:
             self.learnStep(self.history.pop(), reward, self.q_table)
         else:
-            self.learnStep(self.history[len(self.history)-1], reward, self.q_table)
-        # self.learnStep(self.proxHistory[len(self.proxHistory)-1], reward, self.proxTable)
+            self.learnStep(self.history[len(self.history)-1], reward, self.q_table) #this is the problem I'm currently solving
     ## end learnLast
 
     # Update self info with given info from board/main program
@@ -300,7 +274,7 @@ class Brain:
         print(' name:', self.name)
         print(' position:', self.pos)
         print(' history:', self.history)
-        print(' proxHistory:', self.proxHistory)
+        print(' q_table:', self.q_table)
     ## end printInfo
 
         # def choose_action(self, state):

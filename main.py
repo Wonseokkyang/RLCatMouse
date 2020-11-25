@@ -72,7 +72,6 @@ def main():
         mouseImmediateReward = env.moveMouse(mouseAction)
         print('immediate reward:', mouseImmediateReward)
         print('myMouse.q_table:', myMouse.q_table)
-        print('myMouse.proxTable:', myMouse.proxTable)
 
 
         if debug:
@@ -84,13 +83,15 @@ def main():
         print('catAction:', catAction)
         print('immediate reward:', catImmediateReward)
         print('myCat.q_table:', myCat.q_table)
-        print('myCat.proxTable:', myCat.proxTable)
 
         if debug:
             print('\nCLICK to get feedback from environment.')
             env.win.getMouse()
         #get feedback from the environment
         catPos, catReward, mousePos, mouseReward, done = env.turnEnd()
+        #add goal rewards if any
+        catImmediateReward += catReward
+        mouseImmediateReward += mouseReward
         print('catPos:', catPos, 'catImmediateReward:', catImmediateReward, 'mousePos:', mousePos, 'mouseImmediateReward:', mouseImmediateReward, 'done:', done)
 
         if debug:
@@ -126,7 +127,7 @@ def main():
             print('=AFTER=')
             # print(myMouse.q_table)
             # print(myCat.q_table)
-            myCat.pos, myMouse.pos, cheesePos = env.restart()
+            myCat.pos, myMouse.pos, cheesePos = env.restart()   #using restart() so I can program in random spot spawning
         # env.win.getMouse()
         number_of_turns += 1
         # if number_of_turns == 100:
@@ -151,12 +152,12 @@ def saveAgent(player, catchCount):
         # print('{key:value}', {key:val})
         wfile.writerow({'state' : key,  'action' : val})
 
-    wfile2 = csv.DictWriter(open(str(catchCount)+str(player.name)+'snapshot.csv', 
-            'w', newline=''), fieldnames=['state', 'action'])
-    wfile2.writeheader()
-    for key,val in player.proxTable.items():
-        # print('{key:value}', {key:val})
-        wfile2.writerow({'state' : key,  'action' : val})
+    # wfile2 = csv.DictWriter(open(str(catchCount)+str(player.name)+'snapshot.csv', 
+    #         'w', newline=''), fieldnames=['state', 'action'])
+    # wfile2.writeheader()
+    # for key,val in player.proxTable.items():
+    #     # print('{key:value}', {key:val})
+    #     wfile2.writerow({'state' : key,  'action' : val})
 
 # Function to load a saved agent's memory for testing
 def loadAgent(player):
